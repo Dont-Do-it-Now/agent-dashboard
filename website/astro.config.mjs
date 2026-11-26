@@ -2,20 +2,21 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-  site: 'https://claude-dashboard.uppinote.dev',
+  site: 'https://dont-do-it-now.github.io',
+  base: '/agent-dashboard',
   integrations: [
     starlight({
       title: {
-        ko: 'claude-dashboard',
-        en: 'claude-dashboard',
+        ko: 'Agent Dashboard',
+        en: 'Agent Dashboard',
       },
       description:
-        'Comprehensive status line plugin for Claude Code — context, cost, rate limits, 25+ widgets',
+        'Agent Dashboard status line for Claude Code — context, cost, rate limits, and modular widgets',
       social: [
         {
           icon: 'github',
           label: 'GitHub',
-          href: 'https://github.com/uppinote20/claude-dashboard',
+          href: 'https://github.com/Dont-Do-it-Now/agent-dashboard',
         },
       ],
       defaultLocale: 'root',

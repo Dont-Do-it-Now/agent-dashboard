@@ -4,7 +4,7 @@ argument-hint: ""
 allowed-tools: Bash(echo:*), Bash(cat:*), Bash(grep:*), Bash(uname:*), Bash(powershell*), Read
 ---
 
-# Setup Shell Alias
+# Agent Dashboard Shell Alias
 
 Add a `check-ai` command to quickly check all AI CLI usage from your terminal.
 

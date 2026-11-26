@@ -1,11 +1,11 @@
 {
   "name": "claude-dashboard",
-  "version": "0.1.0",
-  "description": "Unified status line for Claude Code with multi-CLI (Claude, Codex, Gemini, Antigravity, z.ai) usage monitoring, context, rate limits, and cost tracking",
+  "version": "0.1.1",
+  "description": "Agent Dashboard status line for Claude Code with multi-CLI usage monitoring, context, rate limits, and cost tracking",
   "author": {
-    "name": "uppinote"
+    "name": "Reizeo"
   },
-  "repository": "https://github.com/uppinote20/claude-dashboard",
+  "repository": "https://github.com/Dont-Do-it-Now/agent-dashboard",
   "license": "MIT",
   "types": "./types/mod-state.d.ts",
   "keywords": [

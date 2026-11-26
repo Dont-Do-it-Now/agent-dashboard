@@ -1,9 +1,9 @@
-# claude-dashboard
+# Agent Dashboard
 
-![License](https://img.shields.io/github/license/uppinote20/claude-dashboard)
-![Stars](https://img.shields.io/github/stars/uppinote20/claude-dashboard)
+![License](https://img.shields.io/github/license/Dont-Do-it-Now/agent-dashboard)
+![Stars](https://img.shields.io/github/stars/Dont-Do-it-Now/agent-dashboard)
 
-Comprehensive status line plugin for Claude Code — unified usage monitoring across Claude, Codex, Gemini, Antigravity, and z.ai CLIs, with context, rate limits, cost tracking, and a modular widget system.
+Agent Dashboard is a comprehensive status line plugin for Claude Code with unified usage monitoring across Claude, Codex, Gemini, Antigravity, and z.ai CLIs, context, rate limits, cost tracking, and modular widgets.
 
 ## Demo
 
@@ -38,7 +38,7 @@ is required before those steps can be used for Agent Dashboard.
 ### From Plugin Marketplace
 
 ```
-/plugin marketplace add uppinote20/claude-dashboard
+/plugin marketplace add Dont-Do-it-Now/agent-dashboard
 /plugin install claude-dashboard
 /claude-dashboard:setup
 ```
@@ -46,7 +46,7 @@ is required before those steps can be used for Agent Dashboard.
 ### Manual Installation
 
 ```bash
-git clone https://github.com/uppinote20/claude-dashboard.git "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-dashboard"
+git clone https://github.com/Dont-Do-it-Now/agent-dashboard.git "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-dashboard"
 /claude-dashboard:setup
 ```
 

@@ -1,12 +1,12 @@
 ---
-description: Configure claude-dashboard status line settings
+description: Configure Agent Dashboard status line settings
 argument-hint: "[displayMode] [language] [plan] | custom \"widgets\""
 allowed-tools: Read, Write, Bash(node:*), AskUserQuestion
 ---
 
-# Claude Dashboard Setup
+# Agent Dashboard Setup
 
-Configure the claude-dashboard status line plugin with widget system support.
+Configure the Agent Dashboard status line plugin with widget system support.
 
 ## Arguments
 

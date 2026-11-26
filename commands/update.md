@@ -3,7 +3,7 @@ description: Repair or verify the statusLine shim (usually automatic)
 allowed-tools: Read, Bash(node:*)
 ---
 
-# Claude Dashboard Update
+# Agent Dashboard Update
 
 Ensure `statusLine` points at the version-agnostic shim. Normally unnecessary — a
 `SessionStart` hook does this automatically. Use it when hooks are disabled, or to
