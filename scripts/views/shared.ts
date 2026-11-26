@@ -68,7 +68,7 @@ export function modelLabel(model: string): string {
 export function displayPath(path: string, base: string | undefined): string {
   if (base && isAbsolute(path)) {
     const rel = relative(base, path);
-    if (rel && !rel.startsWith('..') && !isAbsolute(rel)) return rel;
+    if (rel && !rel.startsWith('..') && !isAbsolute(rel)) return rel.split(sep).join('/');
   }
   const home = homedir();
   return path.startsWith(home + sep) ? `~${path.slice(home.length)}` : path;

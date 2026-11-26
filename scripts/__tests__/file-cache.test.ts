@@ -79,7 +79,8 @@ describe('file-cache', () => {
     it('writes with 0o600 permissions by default', async () => {
       await saveFileCache(cachePath, { x: 1 });
       const mode = statSync(cachePath).mode & 0o777;
-      expect(mode).toBe(0o600);
+      // Windows exposes a writable flag, not separate owner/group/other permissions.
+      expect(mode).toBe(process.platform === 'win32' ? 0o666 : 0o600);
     });
 
     it('last write wins on the same key', async () => {

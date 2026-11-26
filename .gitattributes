@@ -1,0 +1,3 @@
+# Keep executable module hashbangs compatible with the test transformer on Windows.
+/hooks/ensure-statusline.mjs text eol=lf
+/scripts/statusline-shim.mjs text eol=lf

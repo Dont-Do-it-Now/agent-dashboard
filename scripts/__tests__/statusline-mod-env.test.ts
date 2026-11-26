@@ -25,7 +25,7 @@ let home: string;
 const run = (env: Record<string, string> = {}) =>
   execFileSync('node', [path.join(ROOT, 'dist/index.js')], {
     input: STDIN,
-    env: { PATH: process.env.PATH!, HOME: home, ...env },
+    env: { PATH: process.env.PATH!, HOME: home, USERPROFILE: home, ...env },
     encoding: 'utf8',
   });
 const writeConfig = (config: object) => {
@@ -34,7 +34,12 @@ const writeConfig = (config: object) => {
 };
 const marker = () => path.join(home, '.cache', 'claude-dashboard', `band-${SID}`);
 
-beforeAll(() => { execFileSync('npm', ['run', 'build'], { cwd: ROOT, stdio: 'ignore' }); });
+beforeAll(() => {
+  const windows = process.platform === 'win32';
+  execFileSync(windows ? 'cmd.exe' : 'npm', windows ? ['/d', '/s', '/c', 'npm run build'] : ['run', 'build'], {
+    cwd: ROOT, stdio: 'ignore', windowsHide: true,
+  });
+});
 beforeEach(() => { home = mkdtempSync(path.join(os.tmpdir(), 'cd-home-')); });
 afterEach(() => { rmSync(home, { recursive: true, force: true }); });
 

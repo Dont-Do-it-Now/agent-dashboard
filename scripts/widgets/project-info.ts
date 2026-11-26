@@ -6,7 +6,7 @@
  * @tested scripts/__tests__/widgets.test.ts
  */
 
-import { basename, relative } from 'path';
+import { basename, relative, isAbsolute, sep } from 'path';
 import type { Widget } from './base.js';
 import type { WidgetContext, ProjectInfoData } from '../types.js';
 import { colorize, getTheme } from '../utils/colors.js';
@@ -136,8 +136,9 @@ export const projectInfoWidget: Widget<ProjectInfoData> = {
     const dirName = basename(projectDir || currentDir);
 
     // Compute relative subpath when CWD differs from project root
-    const subPath = (projectDir && currentDir !== projectDir && currentDir.startsWith(projectDir + '/'))
-      ? relative(projectDir, currentDir)
+    const projectRelative = projectDir ? relative(projectDir, currentDir) : '';
+    const subPath = (projectRelative && projectRelative !== '..' && !projectRelative.startsWith(`..${sep}`) && !isAbsolute(projectRelative))
+      ? projectRelative.split(sep).join('/')
       : undefined;
 
     // Worktree name (only present in --worktree sessions)

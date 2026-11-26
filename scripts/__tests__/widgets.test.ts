@@ -44,6 +44,7 @@
  * @covers scripts/utils/git.ts (countUntrackedLines via mock)
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import path from 'path';
 import { modelWidget, getDefaultEffort } from '../widgets/model.js';
 import {
   contextWidget,
@@ -662,6 +663,16 @@ describe('widgets', () => {
 
       expect(data).not.toBeNull();
       expect(data?.subPath).toBeUndefined();
+    });
+
+    it('should display nested native paths with forward slashes', async () => {
+      const projectDir = path.resolve('project');
+      const ctx = createContext({
+        workspace: { current_dir: path.join(projectDir, 'src', 'components'), project_dir: projectDir },
+      });
+      const data = await projectInfoWidget.getData(ctx);
+
+      expect(data?.subPath).toBe('src/components');
     });
 
     it('should not set subPath when project_dir is missing', async () => {
