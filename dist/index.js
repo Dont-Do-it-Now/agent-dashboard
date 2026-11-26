@@ -5268,6 +5268,26 @@ var agentModeWidget = {
   }
 };
 
+// scripts/widgets/retry-countdown.ts
+var retryCountdownWidget = {
+  id: "retryCountdown",
+  name: "Retry Countdown",
+  async getData(ctx) {
+    return parseRetryCountdown(ctx.config.extension?.retry?.enabled === true, process.env.AGENT_DASHBOARD_RETRY_STATUS, process.env.AGENT_DASHBOARD_RETRY_DUE_AT, Date.now());
+  },
+  render(data, _ctx) {
+    const time = data.minutes === null ? "unknown" : data.minutes <= 0 ? "now" : `${data.minutes}m`;
+    const label = data.status === "MANUAL" ? "Reset" : data.status;
+    return colorize(`${label} ${time}`, getTheme().warning);
+  }
+};
+function parseRetryCountdown(enabled, status, dueAtValue, now) {
+  if (!enabled || !status || !["WAIT", "QUEUED", "RESUMING", "AUTO", "MANUAL"].includes(status))
+    return null;
+  const dueAt = Number(dueAtValue);
+  return { status, minutes: Number.isFinite(dueAt) ? Math.max(0, Math.ceil((dueAt - now) / 6e4)) : null };
+}
+
 // scripts/widgets/index.ts
 var widgetRegistry = /* @__PURE__ */ new Map([
   ["model", modelWidget],
@@ -5318,7 +5338,8 @@ var widgetRegistry = /* @__PURE__ */ new Map([
   ["peakHours", peakHoursWidget],
   ["tagStatus", tagStatusWidget],
   ["slashCommand", slashCommandWidget],
-  ["agentMode", agentModeWidget]
+  ["agentMode", agentModeWidget],
+  ["retryCountdown", retryCountdownWidget]
 ]);
 function getWidget(id) {
   return widgetRegistry.get(id);
