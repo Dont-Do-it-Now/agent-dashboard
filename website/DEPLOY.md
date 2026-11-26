@@ -1,6 +1,6 @@
 # Vercel 배포 가이드
 
-claude-dashboard 문서 사이트를 Vercel에 배포하는 방법.
+agent-dashboard 문서 사이트를 Vercel에 배포하는 방법.
 
 ---
 
@@ -16,7 +16,7 @@ claude-dashboard 문서 사이트를 Vercel에 배포하는 방법.
 ## Step 2: 프로젝트 Import
 
 1. Vercel 대시보드에서 **"Add New..." → "Project"** 클릭
-2. **"Import Git Repository"** 섹션에서 `uppinote20/claude-dashboard` 레포를 찾기
+2. **"Import Git Repository"** 섹션에서 `Dont-Do-it-Now/agent-dashboard` 레포를 찾기
    - 안 보이면 **"Adjust GitHub App Permissions"** 클릭 → 해당 레포 접근 허용
 3. 레포 옆의 **"Import"** 클릭
 
@@ -28,7 +28,7 @@ Import 후 설정 화면이 나타남. 아래처럼 설정:
 
 | 항목 | 값 |
 |------|-----|
-| **Project Name** | `claude-dashboard-docs` (원하는 이름) |
+| **Project Name** | `agent-dashboard-docs` (원하는 이름) |
 | **Framework Preset** | `Astro` (자동 감지될 수 있음) |
 | **Root Directory** | **`website`** ← 반드시 변경! |
 | Build Command | `npm run build` (기본값 유지) |
@@ -48,7 +48,7 @@ Import 후 설정 화면이 나타남. 아래처럼 설정:
 
 배포 완료 후 Vercel이 자동으로 URL을 부여함:
 ```
-https://claude-dashboard-docs.vercel.app
+https://agent-dashboard-docs.vercel.app
 ```
 이 URL로 접속해서 사이트가 정상 동작하는지 확인.
 
@@ -58,7 +58,7 @@ https://claude-dashboard-docs.vercel.app
 
 1. Vercel 프로젝트 대시보드 → **"Settings"** 탭
 2. 왼쪽 메뉴에서 **"Domains"** 클릭
-3. 입력란에 **`claude-dashboard.uppinote.dev`** 입력
+3. 입력란에 **`agent-dashboard.uppinote.dev`** 입력
 4. **"Add"** 클릭
 
 Vercel이 DNS 설정 안내를 표시함 → Step 6으로.
@@ -72,7 +72,7 @@ Vercel이 DNS 설정 안내를 표시함 → Step 6으로.
 | 항목 | 값 |
 |------|-----|
 | **Type** | `CNAME` |
-| **Name** | `claude-dashboard` |
+| **Name** | `agent-dashboard` |
 | **Value** | `cname.vercel-dns.com` |
 | **TTL** | Auto (또는 300) |
 
@@ -103,7 +103,7 @@ website/ 폴더가 변경되지 않았을 때 불필요한 빌드를 방지:
 
 ## Step 8: 최종 확인
 
-- `https://claude-dashboard.uppinote.dev` 접속
+- `https://agent-dashboard.uppinote.dev` 접속
 - 한국어 랜딩 페이지 확인
 - `/en/` 경로로 영어 전환 확인
 - 사이드바 네비게이션 동작 확인

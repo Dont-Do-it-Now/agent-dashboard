@@ -1,5 +1,5 @@
 /**
- * How the renderer was invoked: by Claude Code's statusLine, or by the claude-dashboard mod
+ * How the renderer was invoked: by Claude Code's statusLine, or by the agent-dashboard mod
  * (pane / band). Only the mod sets CLAUDE_DASHBOARD_MOD=1; every other variable is ignored
  * without it, so a stray env in the user's shell cannot change the statusLine.
  * @handbook 9.4-render-mode-env

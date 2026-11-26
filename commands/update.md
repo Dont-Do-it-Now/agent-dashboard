@@ -23,7 +23,7 @@ CFGDIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"; CFGDIR="$CFGDIR" node -e '
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });
@@ -38,11 +38,11 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 const src = path.join(cacheRoot, versions[versions.length - 1], "scripts/statusline-shim.mjs");
-const dataDir = path.join(cfgDir, "plugins/data/claude-dashboard-claude-dashboard");
+const dataDir = path.join(cfgDir, "plugins/data/agent-dashboard-agent-dashboard");
 fs.mkdirSync(dataDir, { recursive: true });
 const dest = path.join(dataDir, "statusline.mjs");
 fs.copyFileSync(src, dest);
@@ -66,7 +66,7 @@ CFGDIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}" node -e '
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });
@@ -81,7 +81,7 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/index.js"));
@@ -97,7 +97,7 @@ console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/index.js")
 
 ```
 statusLine already points at the shim — no change needed.
-Shim: ~/.claude/plugins/data/claude-dashboard-claude-dashboard/statusline.mjs
+Shim: ~/.claude/plugins/data/agent-dashboard-agent-dashboard/statusline.mjs
 Resolves to: 1.31.1
 
 Future plugin updates apply automatically.

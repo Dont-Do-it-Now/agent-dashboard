@@ -98,12 +98,12 @@ function hashToken(token) {
 var VERSION = "0.1.3";
 
 // scripts/utils/debug.ts
-var DEBUG = process.env.DEBUG === "claude-dashboard" || process.env.DEBUG === "1" || process.env.DEBUG === "true";
+var DEBUG = process.env.DEBUG === "agent-dashboard" || process.env.DEBUG === "1" || process.env.DEBUG === "true";
 function debugLog(context, message, error) {
   if (!DEBUG)
     return;
   const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-  const prefix = `[claude-dashboard:${context}]`;
+  const prefix = `[agent-dashboard:${context}]`;
   if (error) {
     console.error(`${timestamp} ${prefix} ${message}`, error);
   } else {
@@ -115,7 +115,7 @@ function debugLog(context, message, error) {
 import { readFile as readFile2, writeFile, mkdir, readdir, stat as stat2, unlink } from "fs/promises";
 import os from "os";
 import path from "path";
-var FILE_CACHE_DIR = path.join(os.homedir(), ".cache", "claude-dashboard");
+var FILE_CACHE_DIR = path.join(os.homedir(), ".cache", "agent-dashboard");
 var STALE_CACHE_TTL_SECONDS = 3600;
 var CACHE_CLEANUP_AGE_SECONDS = 3600;
 var CLEANUP_INTERVAL_MS = 36e5;
@@ -274,7 +274,7 @@ async function makeRequest(token) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "User-Agent": `claude-dashboard/${VERSION}`,
+        "User-Agent": `agent-dashboard/${VERSION}`,
         Authorization: `Bearer ${token}`,
         "anthropic-beta": "oauth-2025-04-20"
       },
@@ -296,7 +296,7 @@ async function makeRequestViaCurl(token) {
         "-H",
         "Accept: application/json",
         "-H",
-        `User-Agent: claude-dashboard/${VERSION}`,
+        `User-Agent: agent-dashboard/${VERSION}`,
         "-H",
         `Authorization: Bearer ${token}`,
         "-H",
@@ -614,7 +614,7 @@ async function fetchFromCodexApi(auth, tokenHash) {
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "User-Agent": `claude-dashboard/${VERSION}`,
+        "User-Agent": `agent-dashboard/${VERSION}`,
         "Authorization": `Bearer ${auth.accessToken}`,
         "ChatGPT-Account-Id": auth.accountId
       },
@@ -833,7 +833,7 @@ async function getProjectId(credentials) {
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "User-Agent": `claude-dashboard/${VERSION}`,
+        "User-Agent": `agent-dashboard/${VERSION}`,
         "Authorization": `Bearer ${credentials.accessToken}`
       },
       body: JSON.stringify({
@@ -946,7 +946,7 @@ async function fetchFromGeminiApi(credentials, projectId) {
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "User-Agent": `claude-dashboard/${VERSION}`,
+        "User-Agent": `agent-dashboard/${VERSION}`,
         "Authorization": `Bearer ${credentials.accessToken}`
       },
       body: JSON.stringify({
@@ -2046,8 +2046,8 @@ var en_default = {
     paneClosed: "Dashboard pane closed.",
     bandOn: "Dashboard band on \u2014 statusLine hidden for this session (terminal/desktop only).",
     bandOff: "Dashboard band off \u2014 statusLine restored.",
-    paneUsage: "Usage: /claude-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
-    bandUsage: "Usage: /claude-dashboard-band [on|off]",
+    paneUsage: "Usage: /agent-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
+    bandUsage: "Usage: /agent-dashboard-band [on|off]",
     renderFailed: "Dashboard render failed",
     paneViewSwitched: "Dashboard pane view:",
     tabs: {
@@ -2155,8 +2155,8 @@ var ko_default = {
     paneClosed: "\uB300\uC2DC\uBCF4\uB4DC \uD328\uB110\uC744 \uB2EB\uC558\uC2B5\uB2C8\uB2E4.",
     bandOn: "\uB300\uC2DC\uBCF4\uB4DC \uBC34\uB4DC \uCF1C\uC9D0 \u2014 \uC774 \uC138\uC158\uC758 statusLine\uC744 \uC228\uAE41\uB2C8\uB2E4 (\uD130\uBBF8\uB110/\uB370\uC2A4\uD06C\uD1B1 \uC804\uC6A9).",
     bandOff: "\uB300\uC2DC\uBCF4\uB4DC \uBC34\uB4DC \uAEBC\uC9D0 \u2014 statusLine\uC744 \uBCF5\uC6D0\uD588\uC2B5\uB2C8\uB2E4.",
-    paneUsage: "\uC0AC\uC6A9\uBC95: /claude-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
-    bandUsage: "\uC0AC\uC6A9\uBC95: /claude-dashboard-band [on|off]",
+    paneUsage: "\uC0AC\uC6A9\uBC95: /agent-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
+    bandUsage: "\uC0AC\uC6A9\uBC95: /agent-dashboard-band [on|off]",
     renderFailed: "\uB300\uC2DC\uBCF4\uB4DC \uB80C\uB354 \uC2E4\uD328",
     paneViewSwitched: "\uB300\uC2DC\uBCF4\uB4DC \uD328\uB110 \uBCF4\uAE30:",
     tabs: {

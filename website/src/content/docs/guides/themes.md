@@ -5,11 +5,11 @@ sidebar:
   order: 3
 ---
 
-claude-dashboard supports 9 color themes and 4 separator styles to customize the visual appearance of your status line.
+agent-dashboard supports 9 color themes and 4 separator styles to customize the visual appearance of your status line.
 
 ## Color Themes
 
-Set the theme in your configuration file (`~/.claude/claude-dashboard.local.json`):
+Set the theme in your configuration file (`~/.claude/agent-dashboard.local.json`):
 
 ```json
 {

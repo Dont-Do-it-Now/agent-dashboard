@@ -24,7 +24,7 @@ describe('statusline-shim', () => {
 
   beforeEach(() => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'shim-test-'));
-    cacheRoot = path.join(tmpDir, 'plugins', 'cache', 'claude-dashboard', 'claude-dashboard');
+    cacheRoot = path.join(tmpDir, 'plugins', 'cache', 'agent-dashboard', 'agent-dashboard');
     mkdirSync(cacheRoot, { recursive: true });
   });
 
@@ -74,7 +74,7 @@ describe('statusline-shim', () => {
   describe('deriveCacheRoot', () => {
     it('derives the cache root from the shim location, not from env', () => {
       const shim = path.join(
-        tmpDir, 'plugins', 'data', 'claude-dashboard-claude-dashboard', 'statusline.mjs'
+        tmpDir, 'plugins', 'data', 'agent-dashboard-agent-dashboard', 'statusline.mjs'
       );
 
       expect(deriveCacheRoot(pathToFileURL(shim).href)).toBe(cacheRoot);
@@ -86,7 +86,7 @@ describe('statusline-shim', () => {
 
     beforeEach(() => {
       shimPath = path.join(
-        tmpDir, 'plugins', 'data', 'claude-dashboard-claude-dashboard', 'statusline.mjs'
+        tmpDir, 'plugins', 'data', 'agent-dashboard-agent-dashboard', 'statusline.mjs'
       );
       mkdirSync(path.dirname(shimPath), { recursive: true });
       copyFileSync('scripts/statusline-shim.mjs', shimPath);
@@ -134,19 +134,19 @@ describe('statusline-shim', () => {
       // while process.argv[1] keeps the literal (symlinked) path the shim was invoked with.
       const realRoot = path.join(tmpDir, 'dotfiles-claude');
       const realShimPath = path.join(
-        realRoot, 'plugins', 'data', 'claude-dashboard-claude-dashboard', 'statusline.mjs'
+        realRoot, 'plugins', 'data', 'agent-dashboard-agent-dashboard', 'statusline.mjs'
       );
       mkdirSync(path.dirname(realShimPath), { recursive: true });
       copyFileSync('scripts/statusline-shim.mjs', realShimPath);
 
-      const realCacheRoot = path.join(realRoot, 'plugins', 'cache', 'claude-dashboard', 'claude-dashboard');
+      const realCacheRoot = path.join(realRoot, 'plugins', 'cache', 'agent-dashboard', 'agent-dashboard');
       makeVersion(realCacheRoot, '1.0.0');
       writeFileSync(path.join(realCacheRoot, '1.0.0', 'dist', 'index.js'), "console.log('via-symlink');");
 
       const linkedRoot = path.join(tmpDir, 'claude-config');
       symlinkSync(realRoot, linkedRoot, 'dir');
       const linkedShimPath = path.join(
-        linkedRoot, 'plugins', 'data', 'claude-dashboard-claude-dashboard', 'statusline.mjs'
+        linkedRoot, 'plugins', 'data', 'agent-dashboard-agent-dashboard', 'statusline.mjs'
       );
 
       const result = execFileSync('node', [linkedShimPath], {

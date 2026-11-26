@@ -344,7 +344,7 @@ async function getProjectId(credentials: GeminiCredentials): Promise<string | ty
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `claude-dashboard/${VERSION}`,
+        'User-Agent': `agent-dashboard/${VERSION}`,
         'Authorization': `Bearer ${credentials.accessToken}`,
       },
       body: JSON.stringify({
@@ -495,7 +495,7 @@ async function fetchFromGeminiApi(
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `claude-dashboard/${VERSION}`,
+        'User-Agent': `agent-dashboard/${VERSION}`,
         'Authorization': `Bearer ${credentials.accessToken}`,
       },
       body: JSON.stringify({

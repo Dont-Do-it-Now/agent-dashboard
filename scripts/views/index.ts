@@ -1,6 +1,6 @@
 /**
  * Pane views: session history and activity drawn in the mod pane instead of the widget
- * dashboard (`/claude-dashboard-pane turns|agents|files|todos|errors|bg`). Each view reads
+ * dashboard (`/agent-dashboard-pane turns|agents|files|todos|errors|bg`). Each view reads
  * the incremental transcript parse; agents and files also scan subagent transcripts.
  * @handbook 9.5-pane-views
  * @tested scripts/__tests__/pane-views.test.ts

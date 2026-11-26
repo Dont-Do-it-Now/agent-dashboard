@@ -232,7 +232,7 @@ async function getAntigravitySettings(): Promise<AntigravitySettings | null> {
  * Project id / plan type barely change, so the cross-process copy lives a day.
  * Its cache file is deliberately NOT in CLEANABLE_PREFIXES — the hourly sweep
  * would defeat the long TTL. One small file accumulates per account; users who
- * cycle through many accounts can clear ~/.cache/claude-dashboard by hand.
+ * cycle through many accounts can clear ~/.cache/agent-dashboard by hand.
  */
 interface ProjectMeta {
   projectId: string | null;

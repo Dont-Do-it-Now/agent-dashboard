@@ -5,19 +5,19 @@ sidebar:
   label: 문제 해결
 ---
 
-claude-dashboard 사용 중 발생할 수 있는 문제와 해결 방법을 안내합니다.
+agent-dashboard 사용 중 발생할 수 있는 문제와 해결 방법을 안내합니다.
 
 ## 상태줄이 표시되지 않는 경우
 
 상태줄이 나타나지 않을 때 다음을 확인하세요:
 
-1. **플러그인 설치 확인**: Claude Code에서 `/plugin list`를 실행하여 claude-dashboard가 설치되어 있는지 확인합니다.
+1. **플러그인 설치 확인**: Claude Code에서 `/plugin list`를 실행하여 agent-dashboard가 설치되어 있는지 확인합니다.
 
 2. **settings.json 확인**: `~/.claude/settings.json` 파일의 `statusLine` 항목이
-   `plugins/data/claude-dashboard-claude-dashboard/statusline.mjs` 경로를 가리키는지 확인합니다.
+   `plugins/data/agent-dashboard-agent-dashboard/statusline.mjs` 경로를 가리키는지 확인합니다.
    없다면 setup 커맨드를 다시 실행하세요:
    ```
-   /claude-dashboard:setup
+   /agent-dashboard:setup
    ```
 
 3. **Claude Code 재시작**: 그래도 표시되지 않는다면 Claude Code를 재시작해 보세요.
@@ -26,7 +26,7 @@ claude-dashboard 사용 중 발생할 수 있는 문제와 해결 방법을 안�
    매번 최신 설치 버전을 가리키도록 statusLine 경로를 자동으로 갱신합니다. 훅을 비활성화했거나
    재시작 후에도 갱신되지 않는다면 다음 커맨드로 직접 복구하세요:
    ```
-   /claude-dashboard:update
+   /agent-dashboard:update
    ```
 
 ## 속도 제한에 경고 기호 표시
@@ -45,13 +45,13 @@ claude-dashboard 사용 중 발생할 수 있는 문제와 해결 방법을 안�
 
 ```
 # 한국어로 설정
-/claude-dashboard:setup normal ko
+/agent-dashboard:setup normal ko
 
 # 영어로 설정
-/claude-dashboard:setup normal en
+/agent-dashboard:setup normal en
 ```
 
-또는 설정 파일(`~/.claude/claude-dashboard.local.json`)을 직접 수정할 수 있습니다:
+또는 설정 파일(`~/.claude/agent-dashboard.local.json`)을 직접 수정할 수 있습니다:
 
 ```json
 {
@@ -63,10 +63,10 @@ claude-dashboard 사용 중 발생할 수 있는 문제와 해결 방법을 안�
 
 API 응답이 오래된 데이터를 표시하거나, 비정상적인 값이 보이는 경우 캐시를 삭제하세요.
 
-캐시 파일 위치: `~/.cache/claude-dashboard/`
+캐시 파일 위치: `~/.cache/agent-dashboard/`
 
 ```bash
-rm -rf ~/.cache/claude-dashboard/
+rm -rf ~/.cache/agent-dashboard/
 ```
 
 캐시 파일은 1시간 후 자동으로 정리됩니다. 수동 삭제 후 다음 상태줄 갱신 시 새로운 데이터를 가져옵니다.
@@ -95,7 +95,7 @@ Codex, Gemini, Antigravity, z.ai 위젯은 해당 CLI가 설치되어 있을 때
 ## 플러그인 업데이트 후 상태줄이 갱신되지 않는 경우
 
 일반적으로는 아무 조치도 필요 없습니다. `statusLine`은 매 렌더링마다 최신 설치 버전을 자동으로
-찾아내는 고정 shim 경로(`plugins/data/claude-dashboard-claude-dashboard/statusline.mjs`)를
+찾아내는 고정 shim 경로(`plugins/data/agent-dashboard-agent-dashboard/statusline.mjs`)를
 가리키므로, `/plugin update`만으로 충분합니다.
 
 그래도 이전 버전이 표시된다면 Claude Code를 한 번 재시작하세요 — `SessionStart` 훅이 shim을
@@ -104,7 +104,7 @@ Codex, Gemini, Antigravity, z.ai 위젯은 해당 CLI가 설치되어 있을 때
 방법을 사용하세요):
 
 ```
-/claude-dashboard:update
+/agent-dashboard:update
 ```
 
 이 마이그레이션이 처음 실행될 때 `settings.json` 옆에 `settings.json.bak` 백업 파일을 한 번
@@ -112,9 +112,9 @@ Codex, Gemini, Antigravity, z.ai 위젯은 해당 CLI가 설치되어 있을 때
 
 shim은 항상 설치된 것 중 최신 버전을 사용하므로, 최신 버전의 캐시 디렉터리가 남아 있으면 이전
 버전을 설치해도 효과가 없습니다. 이전 빌드를 일부러 테스트하려면
-`plugins/cache/claude-dashboard/claude-dashboard/` 아래의 최신 버전 디렉터리를 삭제하세요.
+`plugins/cache/agent-dashboard/agent-dashboard/` 아래의 최신 버전 디렉터리를 삭제하세요.
 
 여전히 문제가 있으면 setup을 다시 실행합니다:
 ```
-/claude-dashboard:setup
+/agent-dashboard:setup
 ```

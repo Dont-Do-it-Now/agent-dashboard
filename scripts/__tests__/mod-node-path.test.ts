@@ -10,7 +10,7 @@ import { isMissingExecutable, NODE_LOOKUP_SCRIPT, parseNodePath } from '../mod/n
 
 describe('isMissingExecutable', () => {
   it('matches the engine start failure', () => {
-    const err = new Error('claude-dashboard: $.process.run(node) failed to start: ENOENT: Executable not found in $PATH: "node"');
+    const err = new Error('agent-dashboard: $.process.run(node) failed to start: ENOENT: Executable not found in $PATH: "node"');
     expect(isMissingExecutable(err)).toBe(true);
   });
 

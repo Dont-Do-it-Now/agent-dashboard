@@ -1,14 +1,14 @@
-# Contributing to claude-dashboard
+# Contributing to agent-dashboard
 
-Thank you for your interest in contributing to claude-dashboard!
+Thank you for your interest in contributing to agent-dashboard!
 
 ## Getting Started
 
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/claude-dashboard.git
-   cd claude-dashboard
+   git clone https://github.com/YOUR_USERNAME/agent-dashboard.git
+   cd agent-dashboard
    ```
 3. Install dependencies:
    ```bash
@@ -36,7 +36,7 @@ echo '{"model":{"display_name":"Opus"},"context_window":{"context_window_size":2
 ### Test with Claude Code
 
 ```bash
-claude --plugin-dir /path/to/claude-dashboard
+claude --plugin-dir /path/to/agent-dashboard
 ```
 
 ## Contributing a Widget

@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import path from 'path';
 import os from 'os';
 
-const TEST_HOME = path.join(os.tmpdir(), 'claude-dashboard-configdir-test-' + process.pid);
+const TEST_HOME = path.join(os.tmpdir(), 'agent-dashboard-configdir-test-' + process.pid);
 
 // Mock homedir so the default branch is assertable without touching the real home
 vi.mock('os', async (importOriginal) => {

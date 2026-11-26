@@ -245,7 +245,7 @@ export type SeparatorStyle = 'pipe' | 'space' | 'dot' | 'arrow';
 export type ModLayout = string | WidgetId[][];
 
 /**
- * User configuration stored in ~/.claude/claude-dashboard.local.json
+ * User configuration stored in ~/.claude/agent-dashboard.local.json
  */
 export interface Config {
   language: 'en' | 'ko' | 'auto';

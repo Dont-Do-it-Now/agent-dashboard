@@ -179,7 +179,7 @@ Use the provided arguments directly.
 
 ### 2. Create configuration file
 
-Write `~/.claude/claude-dashboard.local.json`. **If the file already exists, read it first and keep every key this command does not set** (e.g. `tagPatterns`, `dailyBudget`, `modBand`; `modBandDefault` only in direct mode, where Turn 4 is not asked) — only overwrite the keys chosen in this run. A user who reruns setup to change the theme must not lose the rest of their config.
+Write `~/.claude/agent-dashboard.local.json`. **If the file already exists, read it first and keep every key this command does not set** (e.g. `tagPatterns`, `dailyBudget`, `modBand`; `modBandDefault` only in direct mode, where Turn 4 is not asked) — only overwrite the keys chosen in this run. A user who reruns setup to change the theme must not lose the rest of their config.
 
 > This file intentionally stays in `~/.claude` even when `CLAUDE_CONFIG_DIR` is set — it is the dashboard's own display config, shared by every account, and the statusline always reads it from there.
 
@@ -262,7 +262,7 @@ CFGDIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"; CFGDIR="$CFGDIR" node -e '
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });
@@ -277,11 +277,11 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 const src = path.join(cacheRoot, versions[versions.length - 1], "scripts/statusline-shim.mjs");
-const dataDir = path.join(cfgDir, "plugins/data/claude-dashboard-claude-dashboard");
+const dataDir = path.join(cfgDir, "plugins/data/agent-dashboard-agent-dashboard");
 fs.mkdirSync(dataDir, { recursive: true });
 const dest = path.join(dataDir, "statusline.mjs");
 fs.copyFileSync(src, dest);
@@ -297,13 +297,13 @@ fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 
 This command:
 1. Copies the status line shim into the plugin's persistent data directory
-   (`plugins/data/claude-dashboard-claude-dashboard/`), which survives plugin updates
+   (`plugins/data/agent-dashboard-agent-dashboard/`), which survives plugin updates
 2. Points `statusLine` at that fixed path — it resolves the newest installed build on
    every render, so plugin updates need no further settings change
-3. Prints `claude-dashboard is not installed in <configdir>` and exits non-zero if no
+3. Prints `agent-dashboard is not installed in <configdir>` and exits non-zero if no
    version is installed there yet
 
-**Note**: After `/plugin update claude-dashboard`, the status line picks up the new version
+**Note**: After `/plugin update agent-dashboard`, the status line picks up the new version
 automatically — no follow-up command is needed. Run `/agent-dashboard:update` only if you
 have hooks disabled or the status line is not updating.
 

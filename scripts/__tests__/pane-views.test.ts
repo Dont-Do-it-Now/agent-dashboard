@@ -16,7 +16,7 @@ import os from 'os';
 import { MOCK_CONFIG, MOCK_STDIN, MOCK_TRANSLATIONS } from './fixtures.js';
 import type { WidgetContext } from '../types.js';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-pane-views-test');
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-pane-views-test');
 const SESSION = path.join(TEST_DIR, 'session.jsonl');
 const SUB_DIR = path.join(TEST_DIR, 'session', 'subagents');
 const PROJECT = path.join(TEST_DIR, 'project');

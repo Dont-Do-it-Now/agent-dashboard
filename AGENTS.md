@@ -1,6 +1,6 @@
 # AI CLI Dashboard — development agent entry point
 
-Goal: provide the claude-dashboard single-line status bar design in both Claude Code and Codex CLI. Do not create a separate window or service.
+Goal: provide the agent-dashboard single-line status bar design in both Claude Code and Codex CLI. Do not create a separate window or service.
 
 ## Working rules
 - Read docs/ROADMAP.md and docs/STATUS.md first, then select the first incomplete task. Read only that document and its direct prerequisite contracts.

@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 
 describe('transcript-parser', () => {
-  const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-transcript-test');
+  const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-transcript-test');
   const TEST_FILE = path.join(TEST_DIR, 'transcript.jsonl');
 
   beforeEach(async () => {
@@ -1380,7 +1380,7 @@ describe('transcript-parser', () => {
 
     /** Path of the persisted parse state (FILE_CACHE_DIR is under the mocked homedir). */
     async function stateFilePath(): Promise<string> {
-      const dir = path.join(TEST_DIR, '.cache', 'claude-dashboard');
+      const dir = path.join(TEST_DIR, '.cache', 'agent-dashboard');
       const [file] = (await readdir(dir)).filter((f) => f.startsWith('transcript-'));
       return path.join(dir, file);
     }

@@ -38,7 +38,7 @@ sidebar:
 
 **예시 레이아웃:**
 ```jsonc
-// .claude/claude-dashboard.local.json
+// .claude/agent-dashboard.local.json
 "lines": [
   ["projectInfo", "contextBar", "contextPercentage", "rateLimit5h"]
 ]
@@ -356,7 +356,7 @@ sidebar:
 - **데이터 소스**: 트랜스크립트 (사용자 텍스트의 `<command-name>` 태그)
 - **표시 내용**: 현재 턴을 시작한 슬래시 명령을 표시합니다 (예: `/superpowers:brainstorming`). 사용자가 일반 텍스트 메시지를 보내면 자동 해제됩니다. Claude의 도구 루프 동안에는 `tool_result`만 있는 user 엔트리는 무시되어 명령이 유지됩니다.
 - **프리셋 문자**: `/`
-- **출력 예시**: `🎯 /superpowers:brainstorming`, `🎯 /claude-dashboard:setup`
+- **출력 예시**: `🎯 /superpowers:brainstorming`, `🎯 /agent-dashboard:setup`
 
 ### agentMode
 

@@ -156,7 +156,7 @@ async function makeRequest(token: string): Promise<Response> {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `claude-dashboard/${VERSION}`,
+        'User-Agent': `agent-dashboard/${VERSION}`,
         Authorization: `Bearer ${token}`,
         'anthropic-beta': 'oauth-2025-04-20',
       },
@@ -185,7 +185,7 @@ async function makeRequestViaCurl(token: string): Promise<{ ok: boolean; status:
         '-w', '\n%{http_code}',
         API_URL,
         '-H', 'Accept: application/json',
-        '-H', `User-Agent: claude-dashboard/${VERSION}`,
+        '-H', `User-Agent: agent-dashboard/${VERSION}`,
         '-H', `Authorization: Bearer ${token}`,
         '-H', 'anthropic-beta: oauth-2025-04-20',
       ],

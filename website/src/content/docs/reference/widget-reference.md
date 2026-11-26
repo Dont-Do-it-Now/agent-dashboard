@@ -51,7 +51,7 @@ Sub-widgets of `context` that render just one of its three components. Use them 
 
 **Example layout:**
 ```jsonc
-// .claude/claude-dashboard.local.json
+// .claude/agent-dashboard.local.json
 "lines": [
   ["projectInfo", "contextBar", "contextPercentage", "rateLimit5h"]
 ]
@@ -640,7 +640,7 @@ v1.2.3 +5, beta-3 +2
 **Example output:**
 ```
 🎯 /superpowers:brainstorming
-🎯 /claude-dashboard:setup
+🎯 /agent-dashboard:setup
 ```
 
 ### agentMode

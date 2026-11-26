@@ -7,10 +7,10 @@ sidebar:
 
 ## 설치 후 첫 설정
 
-설치가 완료되면 `/claude-dashboard:setup` 커맨드를 실행하여 상태줄을 설정합니다.
+설치가 완료되면 `/agent-dashboard:setup` 커맨드를 실행하여 상태줄을 설정합니다.
 
 ```
-/claude-dashboard:setup
+/agent-dashboard:setup
 ```
 
 인자 없이 실행하면 대화형 모드로 디스플레이 모드, 언어, 플랜, 테마를 선택할 수 있습니다.
@@ -24,7 +24,7 @@ sidebar:
 핵심 정보만 표시합니다: 모델, 컨텍스트 사용량, 비용, 속도 제한.
 
 ```
-/claude-dashboard:setup compact
+/agent-dashboard:setup compact
 ```
 
 ```
@@ -36,7 +36,7 @@ sidebar:
 프로젝트 정보, 세션 ID, 세션 시간, 번 레이트, TODO 진행률을 추가로 표시합니다.
 
 ```
-/claude-dashboard:setup normal
+/agent-dashboard:setup normal
 ```
 
 ```
@@ -49,7 +49,7 @@ sidebar:
 모든 위젯을 포함하여 전체 대시보드를 표시합니다.
 
 ```
-/claude-dashboard:setup detailed
+/agent-dashboard:setup detailed
 ```
 
 ```
@@ -67,10 +67,10 @@ CLAUDE.md: 2 │ ⚙️ Read(app.ts) (12 done) │ 🤖 Agent: 1 │ 📦 85% �
 
 ```bash
 # 한국어, Max 플랜
-/claude-dashboard:setup normal ko max
+/agent-dashboard:setup normal ko max
 
 # 영어, Pro 플랜
-/claude-dashboard:setup compact en pro
+/agent-dashboard:setup compact en pro
 ```
 
 ## 다음 단계

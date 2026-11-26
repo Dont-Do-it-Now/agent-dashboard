@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-claude-dashboard is configured through a JSON file and the `/claude-dashboard:setup` command.
+agent-dashboard is configured through a JSON file and the `/agent-dashboard:setup` command.
 
 ## Setup Command
 
@@ -13,16 +13,16 @@ The fastest way to configure is via the setup command:
 
 ```bash
 # Preset modes
-/claude-dashboard:setup compact             # 1 line (default)
-/claude-dashboard:setup normal en pro       # 2 lines, English, Pro plan
-/claude-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
+/agent-dashboard:setup compact             # 1 line (default)
+/agent-dashboard:setup normal en pro       # 2 lines, English, Pro plan
+/agent-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
 
 # Custom mode: control widget order and line composition
 # Format: "widget1,widget2,...|widget3,widget4,..." (| separates lines)
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
-Running `/claude-dashboard:setup` without arguments launches interactive mode, which guides you through each option.
+Running `/agent-dashboard:setup` without arguments launches interactive mode, which guides you through each option.
 
 ## Plan Differences
 
@@ -38,7 +38,7 @@ The 7-day Sonnet rate limit widget (`rateLimit7dSonnet`) is deprecated as of ~20
 
 ## Configuration File
 
-The configuration is stored at `~/.claude/claude-dashboard.local.json`. You can edit this file directly or use the setup command.
+The configuration is stored at `~/.claude/agent-dashboard.local.json`. You can edit this file directly or use the setup command.
 
 ### Full Example
 

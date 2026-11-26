@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import type { WidgetContext } from '../types.js';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-model-test-' + process.pid);
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-model-test-' + process.pid);
 const SETTINGS_FILE = path.join(TEST_DIR, '.claude', 'settings.json');
 
 // Second account's config dir, as relocated via CLAUDE_CONFIG_DIR

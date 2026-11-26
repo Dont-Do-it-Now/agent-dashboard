@@ -7,7 +7,7 @@ import { mkdir, writeFile, rm, utimes } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-subagents-test');
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-subagents-test');
 const SESSION = path.join(TEST_DIR, 'session.jsonl');
 const SUB_DIR = path.join(TEST_DIR, 'session', 'subagents');
 const NOW = Date.UTC(2026, 0, 1, 1, 0, 0);

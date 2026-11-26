@@ -1,6 +1,6 @@
 ---
 title: 설치
-description: claude-dashboard 설치 방법
+description: agent-dashboard 설치 방법
 sidebar:
   order: 1
 ---
@@ -15,9 +15,9 @@ sidebar:
 Claude Code 내에서 다음 커맨드를 순서대로 실행하세요:
 
 ```
-/plugin marketplace add uppinote20/claude-dashboard
-/plugin install claude-dashboard
-/claude-dashboard:setup
+/plugin marketplace add Dont-Do-it-Now/agent-dashboard
+/plugin install agent-dashboard
+/agent-dashboard:setup
 ```
 
 ## 수동 설치
@@ -25,8 +25,8 @@ Claude Code 내에서 다음 커맨드를 순서대로 실행하세요:
 Git을 사용하여 직접 설치할 수도 있습니다:
 
 ```bash
-git clone https://github.com/uppinote20/claude-dashboard.git ~/.claude/plugins/claude-dashboard
-/claude-dashboard:setup
+git clone https://github.com/Dont-Do-it-Now/agent-dashboard.git ~/.claude/plugins/agent-dashboard
+/agent-dashboard:setup
 ```
 
 ## 다음 단계

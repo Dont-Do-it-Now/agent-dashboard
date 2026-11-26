@@ -18,7 +18,7 @@ import os from 'os';
 import path from 'path';
 import { debugLog } from './debug.js';
 
-export const FILE_CACHE_DIR = path.join(os.homedir(), '.cache', 'claude-dashboard');
+export const FILE_CACHE_DIR = path.join(os.homedir(), '.cache', 'agent-dashboard');
 
 /**
  * Default TTL for "stale-as-last-resort" reads when fresh fetch fails.

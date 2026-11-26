@@ -151,7 +151,7 @@ i18n: English and Korean supported (auto-detect or set via setup).
 
 ### Extension settings and host limits
 
-The optional `extension` object is stored in `~/.claude/claude-dashboard.local.json`. Existing settings remain valid; automatic behavior is OFF unless explicitly enabled. Invalid automation values are disabled and reported by diagnostics. A minimal example is:
+The optional `extension` object is stored in `~/.claude/agent-dashboard.local.json`. Existing settings remain valid; automatic behavior is OFF unless explicitly enabled. Invalid automation values are disabled and reported by diagnostics. A minimal example is:
 
 ```json
 {
@@ -200,7 +200,7 @@ For diagnostics, inspect the installed Claude/Codex versions and run the existin
 | `normal` | 2 | + projectInfo, sessionId, sessionDuration, burnRate, todoProgress |
 | `detailed` | 6 | + depletionTime, configCounts, toolActivity, agentStatus, cacheHit, promptCache, performance, tokenBreakdown, forecast, budget, codexUsage, antigravityUsage, linesChanged, outputStyle, version, peakHours, lastPrompt, vimMode, apiDuration, tagStatus |
 
-**Configuration file** (`~/.claude/claude-dashboard.local.json`):
+**Configuration file** (`~/.claude/agent-dashboard.local.json`):
 
 ```json
 {
@@ -293,7 +293,7 @@ status line stops updating.
 
 ## Mods (pane & band)
 
-claude-dashboard also ships as a Claude Code **mod** (function-hook plugin, early access, tested on Claude Code 2.1.289). It is bundled in the same plugin (`hooks/hooks.json` → `"modules": ["../dist/mod.js"]`), so there is nothing extra to install. Mods are drawn only in the terminal and the desktop Code tab (not the VS Code panel, not `claude -p`).
+agent-dashboard also ships as a Claude Code **mod** (function-hook plugin, early access, tested on Claude Code 2.1.289). It is bundled in the same plugin (`hooks/hooks.json` → `"modules": ["../dist/mod.js"]`), so there is nothing extra to install. Mods are drawn only in the terminal and the desktop Code tab (not the VS Code panel, not `claude -p`).
 
 | Command | What it does |
 |---------|--------------|
@@ -326,7 +326,7 @@ The selected view is kept for the session only (a new session starts on `dashboa
 
 - `modPane` / `modBand` accept a display mode name (`compact` / `normal` / `detailed`), a preset string, or custom widget lines (`[["model","context"],["sessionIdFull"]]`). Unknown widget ids are dropped; if nothing is left, the default is used. `modBandDefault: true` turns the band on at session start.
 - Interactive `/agent-dashboard:setup` asks how you want to use the mod dashboard (status line only, peek with pane, replace with band, or both) and writes these keys; rerunning setup keeps keys it does not ask about.
-- **How hiding works:** the band writes a per-session heartbeat marker (`~/.cache/claude-dashboard/band-<sessionId>`), refreshed on every render (at most every 60s) and ignored after 180s. It is deleted on `off` and at session end, so if the mod stops the status line comes back by itself within 3 minutes.
+- **How hiding works:** the band writes a per-session heartbeat marker (`~/.cache/agent-dashboard/band-<sessionId>`), refreshed on every render (at most every 60s) and ignored after 180s. It is deleted on `off` and at session end, so if the mod stops the status line comes back by itself within 3 minutes.
 - Theme, language, and `disabledWidgets` follow your normal config. `cacheHit`, `tokenBreakdown`, and `performance` are hidden in the pane and band (the mod API has no per-request cache usage).
 - Data comes from the mod API (context, rate limits, and cost pushed by Claude Code) and the unchanged renderer `dist/index.js`, run as a subprocess.
 
@@ -337,7 +337,7 @@ The selected view is kept for the session only (a new session starts on `dashboa
 
 1. Check if plugin is installed: `/plugin list`
 2. Verify `settings.json` has a `statusLine` entry pointing at
-   `plugins/data/claude-dashboard-claude-dashboard/statusline.mjs`
+   `plugins/data/agent-dashboard-agent-dashboard/statusline.mjs`
 3. If it's still not showing, try restarting Claude Code
 
 </details>
@@ -367,7 +367,7 @@ Notes:
 
 - The variable must be a single directory path, and must be exported to the session.
 - On macOS the OAuth token comes from the Keychain, which holds one entry for all accounts — `CLAUDE_CONFIG_DIR` separates `settings.json` and `history.jsonl` reads, but rate-limit API calls use whichever OAuth token the Keychain holds.
-- `/agent-dashboard:setup` and `/agent-dashboard:update` register the status line into the session's config dir (`$CLAUDE_CONFIG_DIR` if set, `~/.claude` otherwise) — run them once per account. The dashboard's own display config `~/.claude/claude-dashboard.local.json` is intentionally shared across accounts.
+- `/agent-dashboard:setup` and `/agent-dashboard:update` register the status line into the session's config dir (`$CLAUDE_CONFIG_DIR` if set, `~/.claude` otherwise) — run them once per account. The dashboard's own display config `~/.claude/agent-dashboard.local.json` is intentionally shared across accounts.
 
 </details>
 
@@ -386,10 +386,10 @@ Run setup with explicit language:
 <details>
 <summary><strong>Cache issues</strong></summary>
 
-API response cache is stored in `~/.cache/claude-dashboard/`. To clear:
+API response cache is stored in `~/.cache/agent-dashboard/`. To clear:
 
 ```bash
-rm -rf ~/.cache/claude-dashboard/
+rm -rf ~/.cache/agent-dashboard/
 ```
 
 Cache files are automatically cleaned up after 1 hour.
@@ -406,20 +406,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## Star History
 
-[![Star History Chart](https://star-history.dera.page/svg?repos=uppinote20/claude-dashboard&type=Date)](https://star-history.dera.page/#uppinote20/claude-dashboard&Date)
-
-## ☕ Support
-
-If you find this plugin useful, support development:
-
-<div style="display: flex; gap: 20px; align-items: center;">
-  <a href="https://ko-fi.com/uppinote" target="_blank">
-    <img src="https://storage.ko-fi.com/cdn/kofi5.png" alt="Buy Me a Coffee at ko-fi.com" style="height:60px; width:217px;">
-  </a>
-  <a href="https://www.buymeacoffee.com/uppinote" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height:60px; width:217px;">
-  </a>
-</div>
+[![Star History Chart](https://star-history.dera.page/svg?repos=Dont-Do-it-Now/agent-dashboard&type=Date)](https://star-history.dera.page/#Dont-Do-it-Now/agent-dashboard&Date)
 
 ## License
 

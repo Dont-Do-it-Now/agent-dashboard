@@ -4,7 +4,7 @@ export type DashboardSegment = { text: string; color?: string; bold?: boolean; d
 
 declare module 'claude-code' {
   interface PluginState {
-    'claude-dashboard': {
+    'agent-dashboard': {
       paneLines: DashboardSegment[][];
       bandLines: DashboardSegment[][];
     };

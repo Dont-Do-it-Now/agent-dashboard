@@ -9,7 +9,7 @@ sidebar:
 
 ## 사용법
 
-설정 파일(`~/.claude/claude-dashboard.local.json`)에 `"preset"` 값을 추가합니다:
+설정 파일(`~/.claude/agent-dashboard.local.json`)에 `"preset"` 값을 추가합니다:
 
 ```json
 {

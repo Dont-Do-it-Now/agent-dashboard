@@ -50,7 +50,7 @@ grep -q "^check-ai()" ~/.zshrc 2>/dev/null && echo "exists" || echo "not found"
 out to `sort -V`, which is a GNU/BSD extension, not POSIX; re-reads `CLAUDE_CONFIG_DIR` on
 every call, so it follows account switches instead of freezing the path at definition time):
 ```bash
-# Claude Dashboard - check-ai alias
+# Agent Dashboard - check-ai alias
 check-ai() {
   local cfgdir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
   local script
@@ -73,7 +73,7 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/check-usage.js"));
@@ -86,7 +86,7 @@ console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/check-usag
 ```bash
 cat >> ~/.zshrc << 'EOF'
 
-# Claude Dashboard - check-ai alias
+# Agent Dashboard - check-ai alias
 check-ai() {
   local cfgdir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
   local script
@@ -109,7 +109,7 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/check-usage.js"));
@@ -133,10 +133,10 @@ powershell -Command "if (Test-Path $PROFILE) { Select-String -Path $PROFILE -Pat
 
 **Function to add:**
 ```powershell
-# Claude Dashboard - check-ai alias
+# Agent Dashboard - check-ai alias
 function check-ai {
   $base = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { "$env:USERPROFILE\.claude" }
-  $script = (Get-ChildItem "$base\plugins\cache\claude-dashboard\claude-dashboard\*\dist\check-usage.js" | Sort-Object { [version]$_.Directory.Parent.Name } | Select-Object -Last 1).FullName
+  $script = (Get-ChildItem "$base\plugins\cache\agent-dashboard\agent-dashboard\*\dist\check-usage.js" | Sort-Object { [version]$_.Directory.Parent.Name } | Select-Object -Last 1).FullName
   node $script $args
 }
 ```
@@ -145,10 +145,10 @@ function check-ai {
 ```powershell
 powershell -Command "Add-Content -Path $PROFILE -Value @'
 
-# Claude Dashboard - check-ai alias
+# Agent Dashboard - check-ai alias
 function check-ai {
   `$base = if (`$env:CLAUDE_CONFIG_DIR) { `$env:CLAUDE_CONFIG_DIR } else { \"`$env:USERPROFILE\.claude\" }
-  `$script = (Get-ChildItem \"`$base\plugins\cache\claude-dashboard\claude-dashboard\*\dist\check-usage.js\" | Sort-Object { [version]`$_.Directory.Parent.Name } | Select-Object -Last 1).FullName
+  `$script = (Get-ChildItem \"`$base\plugins\cache\agent-dashboard\agent-dashboard\*\dist\check-usage.js\" | Sort-Object { [version]`$_.Directory.Parent.Name } | Select-Object -Last 1).FullName
   node `$script `$args
 }
 '@"

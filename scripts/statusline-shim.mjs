@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Stable entry point for the claude-dashboard status line.
+ * Stable entry point for the agent-dashboard status line.
  *
  * Copied to ${CLAUDE_PLUGIN_DATA}/statusline.mjs by hooks/ensure-statusline.mjs and
  * referenced from settings.json by an absolute path that never changes. Resolves the
@@ -29,7 +29,7 @@ const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
 export function deriveCacheRoot(shimUrl) {
   const pluginsDir = path.resolve(path.dirname(fileURLToPath(shimUrl)), '..', '..');
   const dataName = path.basename(path.dirname(fileURLToPath(shimUrl)));
-  const pluginName = dataName === 'agent-dashboard-agent-dashboard' ? 'agent-dashboard' : 'claude-dashboard';
+  const pluginName = dataName === 'agent-dashboard-agent-dashboard' ? 'agent-dashboard' : 'agent-dashboard';
   return path.join(pluginsDir, 'cache', pluginName, pluginName);
 }
 

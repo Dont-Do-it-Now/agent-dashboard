@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import type { WidgetContext } from '../types.js';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-configcounts-test-' + process.pid);
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-configcounts-test-' + process.pid);
 const PROJECT_DIR = path.join(TEST_DIR, 'proj');
 const DEFAULT_CLAUDE_JSON = path.join(TEST_DIR, '.claude.json');
 

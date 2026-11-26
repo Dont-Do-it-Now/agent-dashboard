@@ -7,7 +7,7 @@ import { mkdir, writeFile, rm, utimes } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-cred-test-' + process.pid);
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-cred-test-' + process.pid);
 const CRED_DIR = path.join(TEST_DIR, '.claude');
 const CRED_FILE = path.join(CRED_DIR, '.credentials.json');
 

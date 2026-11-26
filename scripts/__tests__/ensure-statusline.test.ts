@@ -25,7 +25,7 @@ import { syncShim, migrateStatusLine } from '../../hooks/ensure-statusline.mjs';
 // The version-pinned command shape the migration exists to replace. Shared by the
 // in-process migrateStatusLine tests and the CLI entry-point test.
 const PINNED =
-  'node /home/u/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.31.0/dist/index.js';
+  'node /home/u/.claude/plugins/cache/agent-dashboard/agent-dashboard/1.31.0/dist/index.js';
 
 describe('ensure-statusline / syncShim', () => {
   let tmpDir: string;
@@ -95,7 +95,7 @@ describe('ensure-statusline / syncShim', () => {
 describe('ensure-statusline / migrateStatusLine', () => {
   let tmpDir: string;
   let settingsPath: string;
-  const SHIM = '/home/u/.claude/plugins/data/claude-dashboard-claude-dashboard/statusline.mjs';
+  const SHIM = '/home/u/.claude/plugins/data/agent-dashboard-agent-dashboard/statusline.mjs';
 
   function writeSettings(value: unknown): void {
     writeFileSync(settingsPath, JSON.stringify(value, null, 2));
@@ -121,7 +121,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
     writeSettings({
       statusLine: {
         type: 'command',
-        command: 'node "C:/Users/A B/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.31.0/dist/index.js"',
+        command: 'node "C:/Users/A B/.claude/plugins/cache/agent-dashboard/agent-dashboard/1.31.0/dist/index.js"',
       },
     });
 
@@ -130,7 +130,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
 
   it('quotes the replacement when the shim path contains a space', () => {
     writeSettings({ statusLine: { type: 'command', command: PINNED } });
-    const spaced = '/home/a b/.claude/plugins/data/claude-dashboard-claude-dashboard/statusline.mjs';
+    const spaced = '/home/a b/.claude/plugins/data/agent-dashboard-agent-dashboard/statusline.mjs';
 
     migrateStatusLine(settingsPath, spaced);
 
@@ -141,7 +141,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
     // Regression guard: a space-only quoting check misses this case entirely, and since
     // statusLine.command is shell-evaluated, an unquoted `(` is a syntax error to `sh`.
     writeSettings({ statusLine: { type: 'command', command: PINNED } });
-    const meta = '/home/user(a)/.claude/plugins/data/claude-dashboard-claude-dashboard/statusline.mjs';
+    const meta = '/home/user(a)/.claude/plugins/data/agent-dashboard-agent-dashboard/statusline.mjs';
 
     migrateStatusLine(settingsPath, meta);
 
@@ -260,7 +260,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
   });
 
   it('skips commands with flags (e.g. --inspect)', () => {
-    writeSettings({ statusLine: { type: 'command', command: 'node --inspect /home/u/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.31.0/dist/index.js' } });
+    writeSettings({ statusLine: { type: 'command', command: 'node --inspect /home/u/.claude/plugins/cache/agent-dashboard/agent-dashboard/1.31.0/dist/index.js' } });
     const before = readFileSync(settingsPath, 'utf8');
 
     expect(migrateStatusLine(settingsPath, SHIM)).toBe('skipped');
@@ -268,7 +268,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
   });
 
   it('skips commands with wrapper scripts', () => {
-    writeSettings({ statusLine: { type: 'command', command: 'node /home/u/my-wrapper.js /home/u/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.31.0/dist/index.js' } });
+    writeSettings({ statusLine: { type: 'command', command: 'node /home/u/my-wrapper.js /home/u/.claude/plugins/cache/agent-dashboard/agent-dashboard/1.31.0/dist/index.js' } });
     const before = readFileSync(settingsPath, 'utf8');
 
     expect(migrateStatusLine(settingsPath, SHIM)).toBe('skipped');
@@ -276,7 +276,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
   });
 
   it('skips mismatched-quote commands', () => {
-    writeSettings({ statusLine: { type: 'command', command: 'node "/home/u/.claude/plugins/cache/claude-dashboard/claude-dashboard/1.31.0/dist/index.js' } });
+    writeSettings({ statusLine: { type: 'command', command: 'node "/home/u/.claude/plugins/cache/agent-dashboard/agent-dashboard/1.31.0/dist/index.js' } });
     const before = readFileSync(settingsPath, 'utf8');
 
     expect(migrateStatusLine(settingsPath, SHIM)).toBe('skipped');
@@ -284,7 +284,7 @@ describe('ensure-statusline / migrateStatusLine', () => {
   });
 
   it('rewrites Windows backslash paths', () => {
-    writeSettings({ statusLine: { type: 'command', command: 'node C:\\Users\\u\\.claude\\plugins\\cache\\claude-dashboard\\claude-dashboard\\1.31.0\\dist\\index.js' } });
+    writeSettings({ statusLine: { type: 'command', command: 'node C:\\Users\\u\\.claude\\plugins\\cache\\agent-dashboard\\agent-dashboard\\1.31.0\\dist\\index.js' } });
 
     expect(migrateStatusLine(settingsPath, SHIM)).toBe('migrated');
     expect(JSON.parse(readFileSync(settingsPath, 'utf8')).statusLine.command).toBe(`node ${JSON.stringify(SHIM)}`);

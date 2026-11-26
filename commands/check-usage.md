@@ -58,7 +58,7 @@ const versions = entries
     return pa[0] - pb[0] || pa[1] - pb[1] || pa[2] - pb[2];
   });
 if (versions.length === 0) {
-  console.error("claude-dashboard is not installed in " + cfgDir);
+  console.error("agent-dashboard is not installed in " + cfgDir);
   process.exit(1);
 }
 console.log(path.join(cacheRoot, versions[versions.length - 1], "dist/check-usage.js"));

@@ -22,8 +22,8 @@ npm-debug.log*
 coverage/
 
 # Cache
-/tmp/claude-dashboard-cache.json
-claude-dashboard.mov
+/tmp/agent-dashboard-cache.json
+agent-dashboard.mov
 
 # Private docs
 .private/

@@ -9,10 +9,10 @@ sidebar:
 
 1. Check if the plugin is installed by running `/plugin list` in Claude Code.
 2. Verify that `~/.claude/settings.json` contains a `statusLine` entry pointing at
-   `plugins/data/claude-dashboard-claude-dashboard/statusline.mjs`.
+   `plugins/data/agent-dashboard-agent-dashboard/statusline.mjs`.
 3. If it's still not showing, try restarting Claude Code.
 
-If the status line still does not appear after restarting, try running `/claude-dashboard:setup` again to regenerate the configuration.
+If the status line still does not appear after restarting, try running `/agent-dashboard:setup` again to regenerate the configuration.
 
 ## Rate limits showing warning
 
@@ -27,18 +27,18 @@ If rate limit widgets display a warning icon instead of percentages:
 If the status line is showing the wrong language, run the setup command with an explicit language argument:
 
 ```
-/claude-dashboard:setup normal en    # Set to English
-/claude-dashboard:setup normal ko    # Set to Korean
+/agent-dashboard:setup normal en    # Set to English
+/agent-dashboard:setup normal ko    # Set to Korean
 ```
 
-You can also edit the configuration file directly at `~/.claude/claude-dashboard.local.json` and change the `"language"` field to `"en"`, `"ko"`, or `"auto"`.
+You can also edit the configuration file directly at `~/.claude/agent-dashboard.local.json` and change the `"language"` field to `"en"`, `"ko"`, or `"auto"`.
 
 ## Cache issues
 
-API response cache is stored in `~/.cache/claude-dashboard/`. If you are experiencing stale data or unexpected behavior, clear the cache:
+API response cache is stored in `~/.cache/agent-dashboard/`. If you are experiencing stale data or unexpected behavior, clear the cache:
 
 ```bash
-rm -rf ~/.cache/claude-dashboard/
+rm -rf ~/.cache/agent-dashboard/
 ```
 
 Cache files are automatically cleaned up after 1 hour, so this is typically only needed when debugging issues.
@@ -46,16 +46,16 @@ Cache files are automatically cleaned up after 1 hour, so this is typically only
 ## Status line not updating after a plugin update
 
 Normally nothing to do here: `statusLine` points at a permanent shim path
-(`plugins/data/claude-dashboard-claude-dashboard/statusline.mjs`) that resolves the newest
+(`plugins/data/agent-dashboard-agent-dashboard/statusline.mjs`) that resolves the newest
 installed build on every render, so `/plugin update` alone is enough.
 
 If the status line still shows the old version, restart Claude Code once — a `SessionStart`
 hook installs the shim and migrates `settings.json` automatically, and it only needs to run
-once. If it persists after restarting, run `/claude-dashboard:update` to repair it manually
+once. If it persists after restarting, run `/agent-dashboard:update` to repair it manually
 (this is also the fix if you have hooks disabled):
 
 ```bash
-/claude-dashboard:update
+/agent-dashboard:update
 ```
 
 The first time this migration runs, it writes a one-time `settings.json.bak` backup next to
@@ -63,7 +63,7 @@ The first time this migration runs, it writes a one-time `settings.json.bak` bac
 
 Because the shim always resolves the newest installed build, installing an older version has
 no effect while a newer version's cache directory still exists. To deliberately test an older
-build, remove the newer version's directory under `plugins/cache/claude-dashboard/claude-dashboard/`.
+build, remove the newer version's directory under `plugins/cache/agent-dashboard/agent-dashboard/`.
 
 ## Multi-CLI widgets not appearing
 

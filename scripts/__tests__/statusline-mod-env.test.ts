@@ -30,9 +30,9 @@ const run = (env: Record<string, string> = {}) =>
   });
 const writeConfig = (config: object) => {
   mkdirSync(path.join(home, '.claude'), { recursive: true });
-  writeFileSync(path.join(home, '.claude', 'claude-dashboard.local.json'), JSON.stringify(config));
+  writeFileSync(path.join(home, '.claude', 'agent-dashboard.local.json'), JSON.stringify(config));
 };
-const marker = () => path.join(home, '.cache', 'claude-dashboard', `band-${SID}`);
+const marker = () => path.join(home, '.cache', 'agent-dashboard', `band-${SID}`);
 
 beforeAll(() => {
   const windows = process.platform === 'win32';

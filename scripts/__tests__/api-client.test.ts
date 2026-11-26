@@ -8,7 +8,7 @@ import path from 'path';
 import os from 'os';
 import { hashToken } from '../utils/hash.js';
 
-const ACTUAL_CACHE_DIR = path.join(os.homedir(), '.cache', 'claude-dashboard');
+const ACTUAL_CACHE_DIR = path.join(os.homedir(), '.cache', 'agent-dashboard');
 
 /**
  * Helper to delete file cache for a specific token
@@ -33,7 +33,7 @@ vi.mock('../version.js', () => ({
 }));
 
 describe('api-client', () => {
-  const TEST_CACHE_DIR = path.join(os.tmpdir(), 'claude-dashboard-test-cache');
+  const TEST_CACHE_DIR = path.join(os.tmpdir(), 'agent-dashboard-test-cache');
 
   beforeEach(async () => {
     vi.resetModules();

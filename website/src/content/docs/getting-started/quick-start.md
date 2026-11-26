@@ -5,14 +5,14 @@ sidebar:
   order: 2
 ---
 
-After installing claude-dashboard, you can configure it using the `/claude-dashboard:setup` command.
+After installing agent-dashboard, you can configure it using the `/agent-dashboard:setup` command.
 
 ## Run Setup
 
 The simplest way to get started is to run the setup command without arguments. This launches interactive mode, which guides you through selecting a display mode, language, plan, and theme:
 
 ```
-/claude-dashboard:setup
+/agent-dashboard:setup
 ```
 
 ## Choose a Display Mode
@@ -24,7 +24,7 @@ There are three built-in preset modes:
 Shows the essential metrics on a single line.
 
 ```
-/claude-dashboard:setup compact
+/agent-dashboard:setup compact
 ```
 
 ```
@@ -36,7 +36,7 @@ Shows the essential metrics on a single line.
 Adds project info, session details, and progress tracking.
 
 ```
-/claude-dashboard:setup normal
+/agent-dashboard:setup normal
 ```
 
 ```
@@ -49,7 +49,7 @@ Adds project info, session details, and progress tracking.
 Shows all available widgets including analytics, multi-CLI usage, and insights.
 
 ```
-/claude-dashboard:setup detailed
+/agent-dashboard:setup detailed
 ```
 
 ```
@@ -66,8 +66,8 @@ CLAUDE.md: 2 │ ⚙️ Read(app.ts) (12 done) │ 🤖 Agent: 1 │ 📦 85% �
 You can pass additional arguments for language and plan:
 
 ```bash
-/claude-dashboard:setup normal en pro       # English, Pro plan
-/claude-dashboard:setup detailed ko max     # Korean, Max plan
+/agent-dashboard:setup normal en pro       # English, Pro plan
+/agent-dashboard:setup detailed ko max     # Korean, Max plan
 ```
 
 ## What's Next

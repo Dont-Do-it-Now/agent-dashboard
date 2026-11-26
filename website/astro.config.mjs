@@ -66,15 +66,15 @@ export default defineConfig({
           translations: { ko: '관련 글' },
           items: [
             {
-              label: 'claude-dashboard Plugin Guide',
-              translations: { ko: 'claude-dashboard 플러그인 가이드' },
-              link: 'https://blog.uppinote.dev/claude-dashboard-plugin-guide/',
+              label: 'agent-dashboard Plugin Guide',
+              translations: { ko: 'agent-dashboard 플러그인 가이드' },
+              link: 'https://blog.uppinote.dev/agent-dashboard-plugin-guide/',
               attrs: { target: '_blank' },
             },
             {
               label: 'v1.10–v1.13: Themes, Performance, Alias',
               translations: { ko: 'v1.10~v1.13 테마·성능·별칭' },
-              link: 'https://blog.uppinote.dev/claude-dashboard-v1-10-to-v1-13-theme-performance-alias/',
+              link: 'https://blog.uppinote.dev/agent-dashboard-v1-10-to-v1-13-theme-performance-alias/',
               attrs: { target: '_blank' },
             },
             {

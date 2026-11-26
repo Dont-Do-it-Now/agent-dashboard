@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-claude-dashboard provides 49 widgets organized by category. Each widget can be individually enabled, disabled, or rearranged in your layout.
+agent-dashboard provides 49 widgets organized by category. Each widget can be individually enabled, disabled, or rearranged in your layout.
 
 ## Core
 

@@ -10,7 +10,7 @@ import { homedir } from 'os';
 import type { WidgetContext } from '../types.js';
 import { debugLog } from './debug.js';
 
-const SESSION_DIR = join(homedir(), '.cache', 'claude-dashboard', 'sessions');
+const SESSION_DIR = join(homedir(), '.cache', 'agent-dashboard', 'sessions');
 const SESSION_MAX_AGE_SECONDS = 604800; // 7 days - cleanup files older than this
 const CLEANUP_INTERVAL_MS = 3600000; // 1 hour - minimum interval between cleanups
 

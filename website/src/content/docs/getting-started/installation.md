@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to install claude-dashboard
+description: How to install agent-dashboard
 sidebar:
   order: 1
 ---
@@ -15,9 +15,9 @@ sidebar:
 Run the following commands inside Claude Code, in order:
 
 ```
-/plugin marketplace add uppinote20/claude-dashboard
-/plugin install claude-dashboard
-/claude-dashboard:setup
+/plugin marketplace add Dont-Do-it-Now/agent-dashboard
+/plugin install agent-dashboard
+/agent-dashboard:setup
 ```
 
 ## Manual Installation
@@ -25,8 +25,8 @@ Run the following commands inside Claude Code, in order:
 You can also install directly using Git:
 
 ```bash
-git clone https://github.com/uppinote20/claude-dashboard.git ~/.claude/plugins/claude-dashboard
-/claude-dashboard:setup
+git clone https://github.com/Dont-Do-it-Now/agent-dashboard.git ~/.claude/plugins/agent-dashboard
+/agent-dashboard:setup
 ```
 
 ## Next Steps

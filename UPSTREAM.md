@@ -2,7 +2,7 @@
 
 - Project: https://github.com/Dont-Do-it-Now/agent-dashboard
 - Maintainer: Reizeo <lugway@gmail.com>
-- Upstream: https://github.com/uppinote20/claude-dashboard
+- Upstream: https://github.com/Dont-Do-it-Now/agent-dashboard
 - Imported commit: `24458736e52f900a34f2fd000bc11c629ed77e7b`
 - Imported version: `1.36.0`
 - License: MIT; the original copyright and full license remain in `LICENSE`.
@@ -47,7 +47,7 @@ authorizes sub-agents to run validation; the parent reviews their evidence and c
 ## Installation and automation constraints
 
 - `scripts/statusline-shim.mjs` resolves bundles from
-  `plugins/cache/claude-dashboard/claude-dashboard/<version>/dist/index.js`.
+  `plugins/cache/agent-dashboard/agent-dashboard/<version>/dist/index.js`.
   Renaming marketplace/plugin IDs requires an explicit migration; changing only
   display metadata is insufficient.
 - `hooks/ensure-statusline.mjs` migrates only recognized upstream version-pinned

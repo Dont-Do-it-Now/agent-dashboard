@@ -1,12 +1,12 @@
 /**
- * Debug utilities for claude-dashboard
+ * Debug utilities for agent-dashboard
  * @handbook 6.3-debug-mode
  *
- * Enable debug logging by setting DEBUG=claude-dashboard or DEBUG=1
+ * Enable debug logging by setting DEBUG=agent-dashboard or DEBUG=1
  */
 
 const DEBUG =
-  process.env.DEBUG === 'claude-dashboard' ||
+  process.env.DEBUG === 'agent-dashboard' ||
   process.env.DEBUG === '1' ||
   process.env.DEBUG === 'true';
 
@@ -17,7 +17,7 @@ export function debugLog(context: string, message: string, error?: unknown): voi
   if (!DEBUG) return;
 
   const timestamp = new Date().toISOString();
-  const prefix = `[claude-dashboard:${context}]`;
+  const prefix = `[agent-dashboard:${context}]`;
 
   if (error) {
     console.error(`${timestamp} ${prefix} ${message}`, error);

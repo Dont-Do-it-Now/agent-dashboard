@@ -27,7 +27,7 @@ export function isPaneView(value: string | undefined): value is PaneView {
 }
 
 /**
- * `/claude-dashboard-pane` arguments: a view name opens the pane on that view (or switches
+ * `/agent-dashboard-pane` arguments: a view name opens the pane on that view (or switches
  * it in place); `on` / `off` / nothing behave like resolveToggle and keep the last view.
  * Null for anything else.
  */

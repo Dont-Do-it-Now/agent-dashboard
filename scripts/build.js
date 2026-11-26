@@ -3,7 +3,7 @@ import { build } from 'esbuild';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 /**
- * Build script for claude-dashboard
+ * Build script for agent-dashboard
  * @handbook 8.3-dist-commit
  * @handbook 9.3-engine-validator-constraints
  */

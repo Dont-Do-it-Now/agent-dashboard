@@ -5,14 +5,14 @@ sidebar:
   order: 1
 ---
 
-claude-dashboard는 세 가지 프리셋 디스플레이 모드와 커스텀 모드를 제공합니다. 각 모드는 이전 모드에 줄을 추가하는 방식(additive)으로 구성되어 있어, 위젯의 위치가 모드 간에 일관되게 유지됩니다.
+agent-dashboard는 세 가지 프리셋 디스플레이 모드와 커스텀 모드를 제공합니다. 각 모드는 이전 모드에 줄을 추가하는 방식(additive)으로 구성되어 있어, 위젯의 위치가 모드 간에 일관되게 유지됩니다.
 
 ## Compact (1줄, 기본값)
 
 핵심 지표만 한 줄로 표시합니다.
 
 ```
-/claude-dashboard:setup compact
+/agent-dashboard:setup compact
 ```
 
 **포함 위젯:** model, context, cost, rateLimit5h, rateLimit7d, rateLimit7dSonnet, rateLimit7dFable, zaiUsage
@@ -30,7 +30,7 @@ claude-dashboard는 세 가지 프리셋 디스플레이 모드와 커스텀 모
 Compact의 모든 위젯에 프로젝트 정보와 세션 관련 위젯을 추가합니다.
 
 ```
-/claude-dashboard:setup normal
+/agent-dashboard:setup normal
 ```
 
 **1줄:** model, context, cost, rateLimit5h, rateLimit7d, rateLimit7dSonnet, rateLimit7dFable, zaiUsage<br/>
@@ -46,7 +46,7 @@ Compact의 모든 위젯에 프로젝트 정보와 세션 관련 위젯을 추�
 모든 위젯을 포함하는 전체 대시보드입니다.
 
 ```
-/claude-dashboard:setup detailed
+/agent-dashboard:setup detailed
 ```
 
 **1줄:** model, context, cost, rateLimit5h, rateLimit7d, rateLimit7dSonnet, rateLimit7dFable, zaiUsage<br/>
@@ -70,7 +70,7 @@ CLAUDE.md: 2 │ ⚙️ Read(app.ts) (12 done) │ 🤖 Agent: 1 │ 📦 85% �
 위젯의 순서와 줄 구성을 직접 제어할 수 있습니다.
 
 ```bash
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
 `|`로 줄을 구분하고, 쉼표로 위젯을 나열합니다. 사용 가능한 위젯은 [위젯](/ko/guides/widgets/) 페이지를 참고하세요.
@@ -80,9 +80,9 @@ CLAUDE.md: 2 │ ⚙️ Read(app.ts) (12 done) │ 🤖 Agent: 1 │ 📦 85% �
 모든 모드에서 언어와 플랜을 지정할 수 있습니다:
 
 ```bash
-/claude-dashboard:setup compact en pro    # 영어, Pro 플랜
-/claude-dashboard:setup normal ko max     # 한국어, Max 플랜
-/claude-dashboard:setup detailed          # 자동 언어, 기본 Max 플랜
+/agent-dashboard:setup compact en pro    # 영어, Pro 플랜
+/agent-dashboard:setup normal ko max     # 한국어, Max 플랜
+/agent-dashboard:setup detailed          # 자동 언어, 기본 Max 플랜
 ```
 
 ## 멀티 프로바이더 지원

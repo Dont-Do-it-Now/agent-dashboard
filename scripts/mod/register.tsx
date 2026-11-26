@@ -1,5 +1,5 @@
 /**
- * claude-dashboard mod: runs the unchanged renderer (dist/index.js) as a subprocess with a
+ * agent-dashboard mod: runs the unchanged renderer (dist/index.js) as a subprocess with a
  * statusLine-shaped stdin built from mod data, and draws its lines in a Pane (/agent-dashboard-pane)
  * or above the prompt (/agent-dashboard-band), where it stands in for this session's statusLine.
  * Exported as a function declaration: the engine's validator reads the built dist/mod.js
@@ -18,7 +18,7 @@ import { PANE_VIEWS, resolvePaneCommand, resolveToggle, type PaneView } from './
 import { buildStdin, type ModRateLimit, type ModSnapshot } from './stdin-builder'
 import { isMissingExecutable, NODE_LOOKUP_SCRIPT, parseNodePath } from './node-path'
 
-const PANE = 'claude-dashboard'
+const PANE = 'agent-dashboard'
 const TICK_MS = 60_000
 // Session views follow subagents and background jobs, which fire no session.measure.
 const VIEW_TICK_MS = 10_000
@@ -26,8 +26,8 @@ const RUN_TIMEOUT_MS = 5_000
 // An interactive shell sourcing nvm can be slow; this runs once per session at most.
 const NODE_LOOKUP_TIMEOUT_MS = 10_000
 
-const paneLines = atom({ plugin: 'claude-dashboard', key: 'paneLines' } as const, [] as Segment[][])
-const bandLines = atom({ plugin: 'claude-dashboard', key: 'bandLines' } as const, [] as Segment[][])
+const paneLines = atom({ plugin: 'agent-dashboard', key: 'paneLines' } as const, [] as Segment[][])
+const bandLines = atom({ plugin: 'agent-dashboard', key: 'bandLines' } as const, [] as Segment[][])
 // The band only draws here; elsewhere no heartbeat is sent, so statusLine stays.
 const BAND_SURFACES: ReadonlySet<string> = new Set(['terminal', 'desktop'])
 
@@ -381,7 +381,7 @@ export function register(on: Parameters<Register>[0]) {
     return { text: await runPaneCommand($, e.args) }
   })
 
-  on('ui.close', { id: 'claude-dashboard' }, ($, e, next) => {
+  on('ui.close', { id: 'agent-dashboard' }, ($, e, next) => {
     isPaneOpen = false
     syncTicker($)
     return next(e)
@@ -394,7 +394,7 @@ export function register(on: Parameters<Register>[0]) {
     return { text: on ? strings().bandOn : strings().bandOff }
   })
 
-  on('ui.render', { component: 'Pane', requestId: 'claude-dashboard' }, async ($, e) => {
+  on('ui.render', { component: 'Pane', requestId: 'agent-dashboard' }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
     const lines = await read($, paneLines)
     return (

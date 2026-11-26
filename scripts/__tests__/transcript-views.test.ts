@@ -8,7 +8,7 @@ import { mkdir, writeFile, appendFile, rm } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-transcript-views-test');
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-transcript-views-test');
 const TEST_FILE = path.join(TEST_DIR, 'transcript.jsonl');
 
 const ts = (s: number) => new Date(Date.UTC(2026, 0, 1, 0, 0, s)).toISOString();

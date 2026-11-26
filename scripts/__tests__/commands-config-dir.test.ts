@@ -93,13 +93,13 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
 
   // Both setup and update now write a fixed shim path (not a version-pinned dist path).
   // Always quoted (FIX A): a space-only quoting check missed shell metacharacters.
-  const shimPath = (dir: string) => path.join(dir, 'plugins/data/claude-dashboard-claude-dashboard/statusline.mjs');
+  const shimPath = (dir: string) => path.join(dir, 'plugins/data/agent-dashboard-agent-dashboard/statusline.mjs');
   const shimCommand = (dir: string) => `node ${JSON.stringify(shimPath(dir))}`;
   const shimContent = (dir: string) => readFileSync(shimPath(dir), 'utf-8');
 
   beforeAll(() => {
     // realpath: node resolves /var -> /private/var on macOS; keep asserts canonical
-    SB = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'claude-dashboard-cmd-test-')));
+    SB = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'agent-dashboard-cmd-test-')));
     HOME = path.join(SB, 'home');
     ALT = path.join(SB, 'alt');
     // 1.9.0 sorts *after* 1.31.1 under plain string comparison ("1.9" > "1.3"), so this
@@ -110,7 +110,7 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
       [path.join(HOME, '.claude'), '1.31.1'],
       [ALT, '2.0.0'],
     ] as const) {
-      const versionDir = path.join(base, 'plugins/cache/claude-dashboard/claude-dashboard', version);
+      const versionDir = path.join(base, 'plugins/cache/agent-dashboard/agent-dashboard', version);
       const dist = path.join(versionDir, 'dist');
       const scripts = path.join(versionDir, 'scripts');
       mkdirSync(dist, { recursive: true });
@@ -189,20 +189,20 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
 
   it('update reports the resolved build path for the selected config dir', () => {
     expect(run(UPDATE_REPORT()).trim()).toBe(
-      path.join(HOME, '.claude', 'plugins/cache/claude-dashboard/claude-dashboard/1.31.1/dist/index.js')
+      path.join(HOME, '.claude', 'plugins/cache/agent-dashboard/agent-dashboard/1.31.1/dist/index.js')
     );
     expect(run(UPDATE_REPORT(), { CLAUDE_CONFIG_DIR: ALT }).trim()).toBe(
-      path.join(ALT, 'plugins/cache/claude-dashboard/claude-dashboard/2.0.0/dist/index.js')
+      path.join(ALT, 'plugins/cache/agent-dashboard/agent-dashboard/2.0.0/dist/index.js')
     );
   });
 
   it('check-usage resolves the script inside the selected config dir', () => {
     const cmd = CHECK_USAGE();
     expect(run(cmd).trim()).toBe(
-      path.join(HOME, '.claude', 'plugins/cache/claude-dashboard/claude-dashboard/1.31.1/dist/check-usage.js')
+      path.join(HOME, '.claude', 'plugins/cache/agent-dashboard/agent-dashboard/1.31.1/dist/check-usage.js')
     );
     expect(run(cmd, { CLAUDE_CONFIG_DIR: ALT }).trim()).toBe(
-      path.join(ALT, 'plugins/cache/claude-dashboard/claude-dashboard/2.0.0/dist/check-usage.js')
+      path.join(ALT, 'plugins/cache/agent-dashboard/agent-dashboard/2.0.0/dist/check-usage.js')
     );
   });
 
@@ -216,12 +216,12 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
     const empty = path.join(SB, 'nothing-installed', '.claude');
     for (const cmd of [SETUP(), UPDATE(), UPDATE_REPORT(), CHECK_USAGE()]) {
       expect(() => run(cmd, { CLAUDE_CONFIG_DIR: empty })).toThrowError(
-        /claude-dashboard is not installed in/
+        /agent-dashboard is not installed in/
       );
     }
     const fn = checkAiFn('commands/setup-alias.md');
     expect(() => run(`${fn}\ncheck-ai`, { CLAUDE_CONFIG_DIR: empty })).toThrowError(
-      /claude-dashboard is not installed in/
+      /agent-dashboard is not installed in/
     );
   });
 
@@ -229,7 +229,7 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
     // A config dir with a `(` in it — no space, so a space-only quoting check would
     // write it unquoted, and `sh` would then choke on the unquoted `(` as a syntax error.
     const metaCfgDir = path.join(SB, 'user(a)', '.claude');
-    const versionDir = path.join(metaCfgDir, 'plugins/cache/claude-dashboard/claude-dashboard', '1.0.0');
+    const versionDir = path.join(metaCfgDir, 'plugins/cache/agent-dashboard/agent-dashboard', '1.0.0');
     mkdirSync(path.join(versionDir, 'scripts'), { recursive: true });
     writeFileSync(path.join(versionDir, 'scripts', 'statusline-shim.mjs'), '// shim\n');
 
@@ -244,12 +244,12 @@ describe.skipIf(process.platform === 'win32')('commands/*.md CLAUDE_CONFIG_DIR s
     const bare = path.join(SB, 'fixture.git');
     run(`git init -q --bare "${bare}" && git clone -q "${bare}" "${SB}/seed" && cd "${SB}/seed" && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m x && git push -q origin HEAD`);
     const clone = line('README.md', /^git clone https.*$/m).replace(
-      'https://github.com/uppinote20/claude-dashboard.git',
+      'https://github.com/Dont-Do-it-Now/agent-dashboard.git',
       bare
     );
     run(clone);
-    expect(existsSync(path.join(HOME, '.claude/plugins/claude-dashboard/.git'))).toBe(true);
+    expect(existsSync(path.join(HOME, '.claude/plugins/agent-dashboard/.git'))).toBe(true);
     run(clone, { CLAUDE_CONFIG_DIR: ALT });
-    expect(existsSync(path.join(ALT, 'plugins/claude-dashboard/.git'))).toBe(true);
+    expect(existsSync(path.join(ALT, 'plugins/agent-dashboard/.git'))).toBe(true);
   });
 });

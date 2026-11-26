@@ -83,8 +83,8 @@
     "paneClosed": "Dashboard pane closed.",
     "bandOn": "Dashboard band on — statusLine hidden for this session (terminal/desktop only).",
     "bandOff": "Dashboard band off — statusLine restored.",
-    "paneUsage": "Usage: /claude-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
-    "bandUsage": "Usage: /claude-dashboard-band [on|off]",
+    "paneUsage": "Usage: /agent-dashboard-pane [on|off|dashboard|turns|agents|files|todos|errors|bg]",
+    "bandUsage": "Usage: /agent-dashboard-band [on|off]",
     "renderFailed": "Dashboard render failed",
     "paneViewSwitched": "Dashboard pane view:",
     "tabs": {

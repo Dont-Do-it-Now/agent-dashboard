@@ -15,7 +15,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { debugLog } from './debug.js';
 
-const BUDGET_DIR = join(homedir(), '.cache', 'claude-dashboard');
+const BUDGET_DIR = join(homedir(), '.cache', 'agent-dashboard');
 const BUDGET_FILE = join(BUDGET_DIR, 'budget.json');
 
 interface BudgetState {

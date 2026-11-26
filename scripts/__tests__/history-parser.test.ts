@@ -7,7 +7,7 @@ import { mkdir, writeFile, rm } from 'fs/promises';
 import path from 'path';
 import os from 'os';
 
-const TEST_DIR = path.join(os.tmpdir(), 'claude-dashboard-history-test-' + process.pid);
+const TEST_DIR = path.join(os.tmpdir(), 'agent-dashboard-history-test-' + process.pid);
 const CLAUDE_DIR = path.join(TEST_DIR, '.claude');
 const HISTORY_FILE = path.join(CLAUDE_DIR, 'history.jsonl');
 

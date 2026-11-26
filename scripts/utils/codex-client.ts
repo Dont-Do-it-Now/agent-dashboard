@@ -367,7 +367,7 @@ async function fetchFromCodexApi(
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'User-Agent': `claude-dashboard/${VERSION}`,
+        'User-Agent': `agent-dashboard/${VERSION}`,
         'Authorization': `Bearer ${auth.accessToken}`,
         'ChatGPT-Account-Id': auth.accountId,
       },

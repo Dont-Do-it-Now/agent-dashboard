@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-claude-dashboard는 Claude Code **mod**(function-hook 플러그인, 얼리 액세스, Claude Code 2.1.289에서 확인)로도 제공됩니다. 같은 플러그인 안에 `hooks/hooks.json`(`"modules": ["../dist/mod.js"]`)으로 포함되어 있어 따로 설치할 것이 없습니다.
+agent-dashboard는 Claude Code **mod**(function-hook 플러그인, 얼리 액세스, Claude Code 2.1.289에서 확인)로도 제공됩니다. 같은 플러그인 안에 `hooks/hooks.json`(`"modules": ["../dist/mod.js"]`)으로 포함되어 있어 따로 설치할 것이 없습니다.
 
 mod는 터미널과 데스크톱 Code 탭에서만 표시됩니다. VS Code 패널이나 `claude -p`에서는 나타나지 않습니다.
 
@@ -13,14 +13,14 @@ mod는 터미널과 데스크톱 Code 탭에서만 표시됩니다. VS Code 패�
 
 | 명령어 | 동작 |
 |--------|------|
-| `/claude-dashboard-pane [on\|off\|dashboard\|turns\|agents\|files\|todos\|errors\|bg]` | 대화 기록 옆에 패널을 열거나 닫습니다(인자가 없으면 현재 상태 반대로, 마지막 뷰 유지). 뷰 이름을 주면 해당 뷰로 패널을 열고, 이미 열려 있으면 그 자리에서 전환합니다. 기본 뷰 `dashboard`는 `modPane` 레이아웃(기본값 `detailed`)을 씁니다. |
-| `/claude-dashboard-band [on\|off]` | 프롬프트 위에 대시보드를 표시하고 **현재 세션에서만** statusLine을 숨깁니다. 레이아웃은 `modBand`(기본값: statusLine 레이아웃)를 따릅니다. |
+| `/agent-dashboard-pane [on\|off\|dashboard\|turns\|agents\|files\|todos\|errors\|bg]` | 대화 기록 옆에 패널을 열거나 닫습니다(인자가 없으면 현재 상태 반대로, 마지막 뷰 유지). 뷰 이름을 주면 해당 뷰로 패널을 열고, 이미 열려 있으면 그 자리에서 전환합니다. 기본 뷰 `dashboard`는 `modPane` 레이아웃(기본값 `detailed`)을 씁니다. |
+| `/agent-dashboard-band [on\|off]` | 프롬프트 위에 대시보드를 표시하고 **현재 세션에서만** statusLine을 숨깁니다. 레이아웃은 `modBand`(기본값: statusLine 레이아웃)를 따릅니다. |
 
-`/claude-dashboard-band`는 `settings.json`을 수정하지 않으며 현재 세션에만 적용됩니다.
+`/agent-dashboard-band`는 `settings.json`을 수정하지 않으며 현재 세션에만 적용됩니다.
 
 ### 패널 뷰
 
-패널 맨 위에 탭바(`1: 대시  2: 턴  3: 에이전트  4: 파일  5: 할 일  6: 에러  7: 백그라운드`)가 있습니다. 탭을 클릭하거나, 패널에 포커스를 준 뒤(클릭 또는 `ctrl+x tab`) 숫자를 누르거나, Tab/방향키로 이동해 Enter를 누르면 전환됩니다. Esc를 누르면 프롬프트로 돌아갑니다. 프롬프트에서는 `/claude-dashboard-pane <view>`로 같은 전환을 할 수 있습니다.
+패널 맨 위에 탭바(`1: 대시  2: 턴  3: 에이전트  4: 파일  5: 할 일  6: 에러  7: 백그라운드`)가 있습니다. 탭을 클릭하거나, 패널에 포커스를 준 뒤(클릭 또는 `ctrl+x tab`) 숫자를 누르거나, Tab/방향키로 이동해 Enter를 누르면 전환됩니다. Esc를 누르면 프롬프트로 돌아갑니다. 프롬프트에서는 `/agent-dashboard-pane <view>`로 같은 전환을 할 수 있습니다.
 
 | 뷰 | 표시 내용 |
 |----|-----------|
@@ -46,13 +46,13 @@ mod는 터미널과 데스크톱 Code 탭에서만 표시됩니다. VS Code 패�
 
 - `modPane`, `modBand`에는 디스플레이 모드 이름(`compact`, `normal`, `detailed`), `"MC$R|BDO"` 같은 프리셋 문자열, 또는 `[["model", "context"], ["sessionIdFull"]]` 같은 위젯 배열을 지정할 수 있습니다. 배열은 statusLine의 `lines`와 같은 형식이라 프리셋 문자가 없는 위젯도 넣을 수 있습니다. 알 수 없는 위젯 ID는 무시되고, 남는 위젯이 없으면 기본값을 씁니다. 패널의 기본값은 위젯 줄이 아니라 섹션형 개요입니다.
 - `"modBandDefault": true`로 설정하면 세션 시작 시 밴드가 자동으로 켜집니다.
-- 대화형 `/claude-dashboard:setup`이 mod 대시보드 사용 방식(statusLine만 / pane으로 엿보기 / band로 대체 / 둘 다)을 묻고 이 키들을 대신 써 줍니다. setup을 다시 실행해도 묻지 않은 키는 유지됩니다.
+- 대화형 `/agent-dashboard:setup`이 mod 대시보드 사용 방식(statusLine만 / pane으로 엿보기 / band로 대체 / 둘 다)을 묻고 이 키들을 대신 써 줍니다. setup을 다시 실행해도 묻지 않은 키는 유지됩니다.
 - 테마, 언어, `disabledWidgets`는 일반 설정을 그대로 따릅니다.
 - `cacheHit`, `tokenBreakdown`, `performance`는 mod API에 요청별 캐시 사용량이 없어 패널과 밴드에서 숨겨집니다.
 
 ## statusLine이 숨겨지는 방식
 
-밴드가 켜져 있는 동안 세션별 하트비트 마커(`~/.cache/claude-dashboard/band-<sessionId>`)를 기록합니다. 마커는 렌더링할 때마다(최대 60초 간격) 갱신되며 180초가 지나면 무시됩니다. `/claude-dashboard-band off`를 실행하거나 세션이 끝나면 삭제됩니다. 따라서 모드가 어떤 이유로든 멈추더라도 3분 이내에 statusLine이 자동으로 돌아옵니다.
+밴드가 켜져 있는 동안 세션별 하트비트 마커(`~/.cache/agent-dashboard/band-<sessionId>`)를 기록합니다. 마커는 렌더링할 때마다(최대 60초 간격) 갱신되며 180초가 지나면 무시됩니다. `/agent-dashboard-band off`를 실행하거나 세션이 끝나면 삭제됩니다. 따라서 모드가 어떤 이유로든 멈추더라도 3분 이내에 statusLine이 자동으로 돌아옵니다.
 
 ## 데이터 출처
 

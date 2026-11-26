@@ -7,19 +7,19 @@ sidebar:
 
 ## setup 커맨드
 
-`/claude-dashboard:setup` 커맨드로 상태줄을 설정할 수 있습니다.
+`/agent-dashboard:setup` 커맨드로 상태줄을 설정할 수 있습니다.
 
 ### 프리셋 모드
 
 ```bash
 # 1줄 (기본값)
-/claude-dashboard:setup compact
+/agent-dashboard:setup compact
 
 # 2줄, 영어, Pro 플랜
-/claude-dashboard:setup normal en pro
+/agent-dashboard:setup normal en pro
 
 # 6줄, 한국어, Max 플랜
-/claude-dashboard:setup detailed ko max
+/agent-dashboard:setup detailed ko max
 ```
 
 ### 커스텀 모드
@@ -27,7 +27,7 @@ sidebar:
 위젯의 순서와 줄 구성을 직접 지정합니다. `|`로 줄을 구분합니다.
 
 ```bash
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
 ### 대화형 모드
@@ -35,7 +35,7 @@ sidebar:
 인자 없이 실행하면 대화형으로 설정할 수 있습니다:
 
 ```
-/claude-dashboard:setup
+/agent-dashboard:setup
 ```
 
 디스플레이 모드, 언어, 플랜, 테마를 순서대로 선택합니다.
@@ -52,7 +52,7 @@ Max 20x는 Ultra로 이름이 바뀌었습니다. 인증된 Ultra 계정은 5시
 
 ## 설정 파일
 
-설정 파일 위치: `~/.claude/claude-dashboard.local.json`
+설정 파일 위치: `~/.claude/agent-dashboard.local.json`
 
 ### 전체 설정 예시
 

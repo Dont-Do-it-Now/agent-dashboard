@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-claude-dashboard supports three built-in display presets plus a fully custom mode. Each mode is additive -- higher modes include all widgets from lower modes plus additional ones.
+agent-dashboard supports three built-in display presets plus a fully custom mode. Each mode is additive -- higher modes include all widgets from lower modes plus additional ones.
 
 ## Compact (1 line) -- Default
 
@@ -20,7 +20,7 @@ The compact mode displays essential metrics on a single line. This is the defaul
 ```
 
 ```
-/claude-dashboard:setup compact
+/agent-dashboard:setup compact
 ```
 
 ## Normal (2 lines)
@@ -36,7 +36,7 @@ Adds project context, session tracking, and progress information on a second lin
 ```
 
 ```
-/claude-dashboard:setup normal
+/agent-dashboard:setup normal
 ```
 
 ## Detailed (6 lines)
@@ -60,7 +60,7 @@ CLAUDE.md: 2 │ ⚙️ Read(app.ts) (12 done) │ 🤖 Agent: 1 │ 📦 85% �
 ```
 
 ```
-/claude-dashboard:setup detailed
+/agent-dashboard:setup detailed
 ```
 
 ## Custom Mode
@@ -70,7 +70,7 @@ Custom mode gives you full control over which widgets appear on each line and in
 **Format:** `"widget1,widget2,...|widget3,widget4,..."` where `|` separates lines.
 
 ```
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
 This creates a 2-line layout:
@@ -92,10 +92,10 @@ Multi-CLI widgets (`codexUsage`, `geminiUsage`, `antigravityUsage`) auto-hide if
 
 ```bash
 # Preset modes
-/claude-dashboard:setup compact             # 1 line (default)
-/claude-dashboard:setup normal en pro       # 2 lines, English, Pro plan
-/claude-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
+/agent-dashboard:setup compact             # 1 line (default)
+/agent-dashboard:setup normal en pro       # 2 lines, English, Pro plan
+/agent-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
 
 # Custom mode
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```

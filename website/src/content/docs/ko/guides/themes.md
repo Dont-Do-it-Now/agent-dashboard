@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-claude-dashboard는 9가지 색상 테마를 제공합니다. 테마는 `getTheme()` 함수의 시맨틱 역할을 통해 위젯 색상을 결정합니다.
+agent-dashboard는 9가지 색상 테마를 제공합니다. 테마는 `getTheme()` 함수의 시맨틱 역할을 통해 위젯 색상을 결정합니다.
 
 ## 사용 가능한 테마
 
@@ -54,7 +54,7 @@ claude-dashboard는 9가지 색상 테마를 제공합니다. 테마는 `getThem
 
 ## 테마 설정
 
-설정 파일(`~/.claude/claude-dashboard.local.json`)에서 `"theme"` 값을 변경합니다:
+설정 파일(`~/.claude/agent-dashboard.local.json`)에서 `"theme"` 값을 변경합니다:
 
 ```json
 {
@@ -65,7 +65,7 @@ claude-dashboard는 9가지 색상 테마를 제공합니다. 테마는 `getThem
 또는 setup 커맨드의 대화형 모드에서 테마를 선택할 수 있습니다:
 
 ```
-/claude-dashboard:setup
+/agent-dashboard:setup
 ```
 
 ## 구분선 스타일

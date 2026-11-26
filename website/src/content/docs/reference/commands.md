@@ -5,9 +5,9 @@ sidebar:
   order: 1
 ---
 
-claude-dashboard provides six commands for setup, usage checking, shell integration, and updating.
+agent-dashboard provides six commands for setup, usage checking, shell integration, and updating.
 
-## /claude-dashboard:setup
+## /agent-dashboard:setup
 
 Configure the status line display mode, language, plan, and theme.
 
@@ -15,10 +15,10 @@ Configure the status line display mode, language, plan, and theme.
 
 ```bash
 # Interactive mode (asks questions)
-/claude-dashboard:setup
+/agent-dashboard:setup
 
 # Direct mode with arguments
-/claude-dashboard:setup [displayMode] [language] [plan] ["customWidgets"]
+/agent-dashboard:setup [displayMode] [language] [plan] ["customWidgets"]
 ```
 
 ### Arguments
@@ -33,11 +33,11 @@ Configure the status line display mode, language, plan, and theme.
 ### Examples
 
 ```bash
-/claude-dashboard:setup                          # Interactive
-/claude-dashboard:setup compact                  # 1 line, defaults
-/claude-dashboard:setup normal en pro            # 2 lines, English, Pro
-/claude-dashboard:setup detailed ko max          # 6 lines, Korean, Max
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup                          # Interactive
+/agent-dashboard:setup compact                  # 1 line, defaults
+/agent-dashboard:setup normal en pro            # 2 lines, English, Pro
+/agent-dashboard:setup detailed ko max          # 6 lines, Korean, Max
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
 ### Notes
@@ -46,17 +46,17 @@ Configure the status line display mode, language, plan, and theme.
 - Run this command again at any time to change settings
 - Interactive mode is best for preset selection; for full widget control, use direct mode or edit the JSON file directly
 
-## /claude-dashboard:check-usage
+## /agent-dashboard:check-usage
 
 Check usage limits for all installed AI CLIs and get a recommendation for which one has the most available capacity.
 
 ### Usage
 
 ```bash
-/claude-dashboard:check-usage              # Interactive output with colors
-/claude-dashboard:check-usage --json       # JSON output for scripting
-/claude-dashboard:check-usage --lang ko    # Specify language
-/claude-dashboard:check-usage --lang en    # Specify language
+/agent-dashboard:check-usage              # Interactive output with colors
+/agent-dashboard:check-usage --json       # JSON output for scripting
+/agent-dashboard:check-usage --lang ko    # Specify language
+/agent-dashboard:check-usage --lang en    # Specify language
 ```
 
 ### Output
@@ -71,14 +71,14 @@ Shows usage for each installed CLI:
 
 At the bottom, recommends the CLI with the lowest current usage.
 
-## /claude-dashboard:setup-alias
+## /agent-dashboard:setup-alias
 
 Add a `check-ai` shell alias to quickly check all AI CLI usage from your terminal. Supports macOS/Linux (zsh/bash) and Windows (PowerShell).
 
 ### Usage
 
 ```bash
-/claude-dashboard:setup-alias
+/agent-dashboard:setup-alias
 ```
 
 ### After Setup
@@ -101,22 +101,22 @@ check-ai --json   # JSON output for scripting
 - Run this command again if you need to reinstall the alias
 - The alias works independently of Claude Code
 
-## /claude-dashboard:update
+## /agent-dashboard:update
 
 Repair or verify the statusLine shim (usually automatic).
 
 ### Usage
 
 ```bash
-/claude-dashboard:update
+/agent-dashboard:update
 ```
 
 ### When to Use
 
 Normally unnecessary — `statusLine` points at a permanent shim path
-(`plugins/data/claude-dashboard-claude-dashboard/statusline.mjs`) that resolves the newest
+(`plugins/data/agent-dashboard-agent-dashboard/statusline.mjs`) that resolves the newest
 installed build on every render, so a `SessionStart` hook keeps it current automatically after
-`/plugin update claude-dashboard`. Run this command only if you have hooks disabled or the
+`/plugin update agent-dashboard`. Run this command only if you have hooks disabled or the
 status line is not updating.
 
 ### What It Does
@@ -129,27 +129,27 @@ status line is not updating.
 If `settings.json` changed, it takes effect at your next interaction with Claude Code — no
 restart is needed.
 
-## /claude-dashboard-pane
+## /agent-dashboard-pane
 
 Open or close a pane beside the transcript (mod, tested on Claude Code 2.1.289). Takes `on`, `off`, a view name, or no argument to flip the current state (the last view is kept). A view name opens the pane on that view, or switches an open pane in place.
 
 ```bash
-/claude-dashboard-pane on
-/claude-dashboard-pane off
-/claude-dashboard-pane      # no argument: flip the current state
-/claude-dashboard-pane turns   # dashboard | turns | agents | files | todos | errors | bg
+/agent-dashboard-pane on
+/agent-dashboard-pane off
+/agent-dashboard-pane      # no argument: flip the current state
+/agent-dashboard-pane turns   # dashboard | turns | agents | files | todos | errors | bg
 ```
 
 Views: `dashboard` (sectioned overview, default), `turns` (per-prompt tokens/tools), `agents` (subagents), `files` (files edited), `todos`, `errors` (failed tool calls), `bg` (background jobs). The view lasts for the session only. For the `dashboard` view, the `modPane` config key switches it to widget lines (unset = the overview). See [Mods](/guides/mods/) for details on each view.
 
-## /claude-dashboard-band
+## /agent-dashboard-band
 
 Draw the dashboard above the prompt and hide the status line for the current session only.
 
 ```bash
-/claude-dashboard-band on
-/claude-dashboard-band off
-/claude-dashboard-band      # no argument: flip the current state
+/agent-dashboard-band on
+/agent-dashboard-band off
+/agent-dashboard-band      # no argument: flip the current state
 ```
 
 Layout comes from `modBand` (default: your status line layout). Set `"modBandDefault": true` to turn it on at session start. `settings.json` is never modified. See [Mods](/guides/mods/).

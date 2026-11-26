@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Claude Dashboard Status Line
+ * Agent Dashboard Status Line
  * Displays model info, context usage, rate limits, and more
  * @handbook 2.2-import-order
  * @handbook 4.6-config-caching
@@ -32,7 +32,7 @@ import { markBand, clearBand, isBandActive } from './utils/band-marker.js';
 // stays on homedir() rather than following CLAUDE_CONFIG_DIR: setup writes it to
 // ~/.claude unconditionally, and relocating the read would silently reset an
 // existing multi-account user's dashboard to DEFAULT_CONFIG.
-const CONFIG_PATH = join(homedir(), '.claude', 'claude-dashboard.local.json');
+const CONFIG_PATH = join(homedir(), '.claude', 'agent-dashboard.local.json');
 
 /**
  * Cached config with mtime-based invalidation
