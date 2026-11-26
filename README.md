@@ -5,13 +5,22 @@
 
 Agent Dashboard is a comprehensive status line plugin for Claude Code with unified usage monitoring across Claude, Codex, Gemini, Antigravity, and z.ai CLIs, context, rate limits, cost tracking, and modular widgets.
 
-## Demo
+## Supported features
 
-![Agent Dashboard CLI output](images/agent-dashboard-cli-demo.svg)
+| Host | Version baseline | Supported in Agent Dashboard | Status |
+|---|---:|---|---|
+| Claude Code | v1.0.80+ | Native `statusLine.command`, plugin commands, lifecycle hooks, usage/context/cost/rate-limit widgets | Supported |
+| Claude Code | v2.1.332 verified | Effort/model fields, lifecycle event mapping, extension policy and retry countdown display | Verified locally |
+| Codex CLI | v0.171.0+ | Official experimental custom statusline host capability exists; this repository provides the shared renderer contract and Codex usage collector | Host adapter pending |
+| Codex CLI | v0.172.0 verified | `queue --thread --message` can target an existing session when invoked manually | Manual queue only; no native scheduler |
+
+Agent Dashboard does not claim automatic quota resume, delayed prompt injection, or Codex native plugin rendering until those host APIs are verified. Unsupported automation remains disabled and is documented as manual guidance.
 
 ## Installation
 
-**Requirements:** Claude Code v1.0.80+ / Node.js 18+
+**Requirements:** Node.js 18+.
+
+For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code v2.1.332 is the locally verified extension baseline. Codex CLI support is version-gated separately: v0.171.0 introduced the experimental custom-statusline host capability, and v0.172.0 is the locally verified queue command baseline. The Codex host adapter is not yet enabled, so Codex usage display and renderer contracts must not be described as a completed native Codex plugin.
 
 ### Claude and Codex compatibility
 
