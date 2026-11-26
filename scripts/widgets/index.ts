@@ -63,6 +63,7 @@ import { peakHoursWidget } from './peak-hours.js';
 import { tagStatusWidget } from './tag-status.js';
 import { slashCommandWidget } from './slash-command.js';
 import { agentModeWidget } from './agent-mode.js';
+import { retryCountdownWidget } from './retry-countdown.js';
 
 /**
  * Widget registry - maps widget IDs to widget implementations
@@ -117,6 +118,7 @@ const widgetRegistry = new Map<WidgetId, Widget>([
   ['tagStatus', tagStatusWidget],
   ['slashCommand', slashCommandWidget],
   ['agentMode', agentModeWidget],
+  ['retryCountdown', retryCountdownWidget],
 ] as [WidgetId, Widget][]);
 
 /**

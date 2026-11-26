@@ -198,7 +198,8 @@ export type WidgetId =
   | 'peakHours'
   | 'tagStatus'
   | 'slashCommand'
-  | 'agentMode';
+  | 'agentMode'
+  | 'retryCountdown';
 
 /**
  * Display mode for status line output
@@ -632,6 +633,11 @@ export interface DepletionTimeData {
   limitType: '5h' | '7d';
 }
 
+export interface RetryCountdownData {
+  status: 'WAIT' | 'QUEUED' | 'RESUMING' | 'AUTO' | 'MANUAL';
+  minutes: number | null;
+}
+
 /**
  * Cache hit rate data - percentage of tokens served from cache
  * @invariant hitPercentage is in range [0, 100] (enforced in widget)
@@ -981,6 +987,7 @@ export type WidgetData =
   | TodoProgressData
   | BurnRateData
   | DepletionTimeData
+  | RetryCountdownData
   | CacheHitData
   | PromptCacheData
   | CodexUsageData
