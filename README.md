@@ -7,7 +7,7 @@ Agent Dashboard is a comprehensive status line plugin for Claude Code with unifi
 
 ## Demo
 
-![Agent Dashboard demo](images/agent-dashboard-demo.png)
+![Agent Dashboard CLI output](images/agent-dashboard-cli-demo.svg)
 
 ## Installation
 
