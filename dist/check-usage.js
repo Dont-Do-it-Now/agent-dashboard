@@ -95,7 +95,7 @@ function hashToken(token) {
 }
 
 // scripts/version.ts
-var VERSION = "0.1.1";
+var VERSION = "0.1.2";
 
 // scripts/utils/debug.ts
 var DEBUG = process.env.DEBUG === "claude-dashboard" || process.env.DEBUG === "1" || process.env.DEBUG === "true";

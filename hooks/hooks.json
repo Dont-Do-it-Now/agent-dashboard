@@ -7,9 +7,43 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/ensure-statusline.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/agent-dashboard-events.mjs\" sessionStarted"
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/agent-dashboard-events.mjs\" turnStarted"
+        }
+      ]
+    }
+    ],
+    "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/agent-dashboard-events.mjs\" turnEnded"
+        }
+      ]
+    }
+    ],
+    "SessionEnd": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/agent-dashboard-events.mjs\" sessionEnded"
+        }
+      ]
+    }
     ]
   },
   "modules": [
