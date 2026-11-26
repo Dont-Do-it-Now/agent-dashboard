@@ -27,6 +27,7 @@ claude-dashboard.mov
 
 # Private docs
 .private/
+/docs/
 
 # Website
 website/node_modules/
