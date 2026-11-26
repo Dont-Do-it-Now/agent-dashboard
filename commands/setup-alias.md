@@ -58,7 +58,7 @@ check-ai() {
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });
@@ -94,7 +94,7 @@ check-ai() {
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });

@@ -1,7 +1,7 @@
 /**
  * claude-dashboard mod: runs the unchanged renderer (dist/index.js) as a subprocess with a
- * statusLine-shaped stdin built from mod data, and draws its lines in a Pane (/claude-dashboard-pane)
- * or above the prompt (/claude-dashboard-band), where it stands in for this session's statusLine.
+ * statusLine-shaped stdin built from mod data, and draws its lines in a Pane (/agent-dashboard-pane)
+ * or above the prompt (/agent-dashboard-band), where it stands in for this session's statusLine.
  * Exported as a function declaration: the engine's validator reads the built dist/mod.js
  * literally and refuses `var register = …`, which an arrow export compiles to.
  * @handbook 9.1-mod-renderer-subprocess
@@ -330,7 +330,7 @@ function drawLines(Box: any, Text: any, lines: Segment[][]) {
 export function register(on: Parameters<Register>[0]) {
   on('session.start', async ($, e, next) => {
     await $.command.register({
-      name: 'claude-dashboard-pane',
+      name: 'agent-dashboard-pane',
       description: 'Show the dashboard or a session view (turns, agents, files, todos, errors, bg) in a pane',
       argumentHint: '[on|off|dashboard|turns|agents|files|todos|errors|bg]',
     })
@@ -346,7 +346,7 @@ export function register(on: Parameters<Register>[0]) {
     Object.assign(snapshot, { sessionId: id, model, cwd, root, version: version.version })
     applyUsage(usage)
     await $.command.register({
-      name: 'claude-dashboard-band',
+      name: 'agent-dashboard-band',
       description: 'Show the dashboard above the prompt instead of the statusLine (on|off, none toggles)',
       argumentHint: '[on|off]',
     })
@@ -377,7 +377,7 @@ export function register(on: Parameters<Register>[0]) {
   })
 
   // Both commands take on, off, or nothing to flip the current state; the pane also takes a view.
-  on('command.run', { command: 'claude-dashboard-pane' }, async ($, e) => {
+  on('command.run', { command: 'agent-dashboard-pane' }, async ($, e) => {
     return { text: await runPaneCommand($, e.args) }
   })
 
@@ -387,7 +387,7 @@ export function register(on: Parameters<Register>[0]) {
     return next(e)
   })
 
-  on('command.run', { command: 'claude-dashboard-band' }, async ($, e) => {
+  on('command.run', { command: 'agent-dashboard-band' }, async ($, e) => {
     const on = resolveToggle(e.args, isBandOn)
     if (on === null) return { text: strings().bandUsage }
     await setBand($, on)

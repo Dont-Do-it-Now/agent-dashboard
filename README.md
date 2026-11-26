@@ -243,7 +243,7 @@ Or use preset shorthand for quick configuration:
 
 **Widget Toggle:** Add widget IDs to `disabledWidgets` to hide them from any display mode.
 
-**Mod Layouts:** `modPane` (the `/claude-dashboard-pane` pane; unset, its dashboard tab shows a sectioned overview of usage, context, cost and session) and `modBand` (the `/claude-dashboard-band` band, default = your status line layout) take a display mode name (`compact` / `normal` / `detailed`), a preset string like `"MC$R|BDO"`, or custom widget lines like `[["model","context"],["sessionIdFull"]]` (same as the status line's `lines`). Set `"modBandDefault": true` to turn the band on at session start. See [Mods](#mods-pane--band).
+**Mod Layouts:** `modPane` (the `/agent-dashboard-pane` pane; unset, its dashboard tab shows a sectioned overview of usage, context, cost and session) and `modBand` (the `/agent-dashboard-band` band, default = your status line layout) take a display mode name (`compact` / `normal` / `detailed`), a preset string like `"MC$R|BDO"`, or custom widget lines like `[["model","context"],["sessionIdFull"]]` (same as the status line's `lines`). Set `"modBandDefault": true` to turn the band on at session start. See [Mods](#mods-pane--band).
 
 **Color Legend:** 🟢 0-50% Safe / 🟡 51-80% Warning / 🔴 81-100% Critical
 
@@ -255,14 +255,14 @@ Or use preset shorthand for quick configuration:
 
 Configure the status line display mode, language, and plan. See [Configuration](#configuration).
 
-### `/claude-dashboard:check-usage`
+### `/agent-dashboard:check-usage`
 
 Check usage limits for all AI CLIs (Claude, Codex, Gemini, Antigravity, z.ai) at once and get a recommendation for which CLI has the most available capacity.
 
 ```bash
-/claude-dashboard:check-usage              # Interactive output with colors
-/claude-dashboard:check-usage --json       # JSON output for scripting
-/claude-dashboard:check-usage --lang ko    # Specify language
+/agent-dashboard:check-usage              # Interactive output with colors
+/agent-dashboard:check-usage --json       # JSON output for scripting
+/agent-dashboard:check-usage --lang ko    # Specify language
 ```
 
 ![check-usage](images/check-usage.png)
@@ -281,14 +281,14 @@ check-ai          # Pretty output
 check-ai --json   # JSON output for scripting
 ```
 
-### `/claude-dashboard:update`
+### `/agent-dashboard:update`
 
 Repair or verify the statusLine shim. Usually unnecessary — after `/plugin update`, the
 status line picks up the new version on its own. Use this if you have hooks disabled or the
 status line stops updating.
 
 ```bash
-/claude-dashboard:update
+/agent-dashboard:update
 ```
 
 ## Mods (pane & band)
@@ -297,12 +297,12 @@ claude-dashboard also ships as a Claude Code **mod** (function-hook plugin, earl
 
 | Command | What it does |
 |---------|--------------|
-| `/claude-dashboard-pane [on\|off\|dashboard\|turns\|agents\|files\|todos\|errors\|bg]` | Open or close a pane beside the transcript (no argument flips it, keeping the last view). A view name opens the pane on that view, or switches an open pane in place. Default view `dashboard` uses the `modPane` layout (default `detailed`). |
-| `/claude-dashboard-band [on\|off]` | Draw the dashboard above the prompt and hide the status line for **this session only** (`settings.json` is untouched). Layout from `modBand` (default = your status line layout). |
+| `/agent-dashboard-pane [on\|off\|dashboard\|turns\|agents\|files\|todos\|errors\|bg]` | Open or close a pane beside the transcript (no argument flips it, keeping the last view). A view name opens the pane on that view, or switches an open pane in place. Default view `dashboard` uses the `modPane` layout (default `detailed`). |
+| `/agent-dashboard-band [on\|off]` | Draw the dashboard above the prompt and hide the status line for **this session only** (`settings.json` is untouched). Layout from `modBand` (default = your status line layout). |
 
-**Pane views** (`/claude-dashboard-pane <view>`):
+**Pane views** (`/agent-dashboard-pane <view>`):
 
-The pane has a tab bar (`1: Dash  2: Turns  3: Agents  4: Files  5: Todos  6: Errors  7: Bg`): click a tab, or focus the pane (click it or `ctrl+x tab`) and press its digit, or move with Tab / arrows and press Enter. Esc returns to the prompt. `/claude-dashboard-pane <view>` switches the same way from the prompt.
+The pane has a tab bar (`1: Dash  2: Turns  3: Agents  4: Files  5: Todos  6: Errors  7: Bg`): click a tab, or focus the pane (click it or `ctrl+x tab`) and press its digit, or move with Tab / arrows and press Enter. Esc returns to the prompt. `/agent-dashboard-pane <view>` switches the same way from the prompt.
 
 | View | Shows |
 |------|-------|

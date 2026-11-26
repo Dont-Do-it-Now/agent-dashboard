@@ -11,14 +11,14 @@ Display usage limits for all AI CLIs (Claude, Codex, Gemini, Antigravity, z.ai) 
 
 ```bash
 # Interactive output with colors
-/claude-dashboard:check-usage
+/agent-dashboard:check-usage
 
 # JSON output for scripting
-/claude-dashboard:check-usage --json
+/agent-dashboard:check-usage --json
 
 # Specify language (en or ko)
-/claude-dashboard:check-usage --lang ko
-/claude-dashboard:check-usage --lang en
+/agent-dashboard:check-usage --lang ko
+/agent-dashboard:check-usage --lang en
 ```
 
 ## Output
@@ -43,7 +43,7 @@ CFGDIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"; SCRIPT="$(CFGDIR="$CFGDIR" node -e
 const fs = require("fs");
 const path = require("path");
 const cfgDir = process.env.CFGDIR;
-const cacheRoot = path.join(cfgDir, "plugins/cache/claude-dashboard/claude-dashboard");
+const cacheRoot = path.join(cfgDir, "plugins/cache/agent-dashboard/agent-dashboard");
 let entries = [];
 try {
   entries = fs.readdirSync(cacheRoot, { withFileTypes: true });
