@@ -13,6 +13,28 @@ Comprehensive status line plugin for Claude Code — unified usage monitoring ac
 
 **Requirements:** Claude Code v1.0.80+ / Node.js 18+
 
+### Claude and Codex compatibility
+
+The existing Claude renderer uses Claude Code's `statusLine.command` interface.
+Codex's custom MCP footer is a separate, experimental host interface; the presence
+of the `codexUsage` widget in this plugin does not mean it renders inside Codex.
+This fork's Codex MCP adapter and actual host compatibility are still pending.
+
+| Codex CLI release | Official custom-statusline milestone |
+| --- | --- |
+| [0.171.0 — November 20, 2026 (UTC)](https://github.com/openai/codex/releases/tag/rust-v0.171.0) | First stable release to announce custom MCP statusline rendering, provider selection and authoring through `/statusline`, gated by `tui_extensions_statusline`. Its tagged source also includes **Custom status line** in `/experimental`, disabled by default. |
+
+The [0.171.0 tagged feature definition](https://github.com/openai/codex/blob/ccf9be8cc458bd6b8336fe84d68d8893f2691a5e/codex-rs/features/src/lib.rs)
+confirms that the feature is experimental and disabled by default. This host
+milestone is not a claim that this fork has been tested against that version.
+
+For the menu-based activation flow, use Codex CLI 0.171.0 or later and follow the
+[official pinned authoring guide](https://github.com/openai/codex/blob/af71942309704997f4bdc86c020717646423c080/codex-rs/skills/src/assets/samples/create-statusline/SKILL.md):
+register the MCP provider on the connected app-server host, enable **Custom
+status line** in `/experimental`, restart the TUI, start a new conversation, then
+select the provider under `/statusline`. A working provider entry from this fork
+is required before those steps can be used for Agent Dashboard.
+
 ### From Plugin Marketplace
 
 ```
