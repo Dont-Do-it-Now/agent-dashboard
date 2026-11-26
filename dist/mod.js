@@ -671,7 +671,7 @@ function drawLines(Box, Text, lines) {
 function register(on) {
   on("session.start", async ($, e, next) => {
     await $.command.register({
-      name: "claude-dashboard-pane",
+      name: "agent-dashboard-pane",
       description: "Show the dashboard or a session view (turns, agents, files, todos, errors, bg) in a pane",
       argumentHint: "[on|off|dashboard|turns|agents|files|todos|errors|bg]"
     });
@@ -686,7 +686,7 @@ function register(on) {
     Object.assign(snapshot, { sessionId: id, model, cwd, root, version: version.version });
     applyUsage(usage);
     await $.command.register({
-      name: "claude-dashboard-band",
+      name: "agent-dashboard-band",
       description: "Show the dashboard above the prompt instead of the statusLine (on|off, none toggles)",
       argumentHint: "[on|off]"
     });
@@ -714,7 +714,7 @@ function register(on) {
     void requestRefresh($);
     return next(e);
   });
-  on("command.run", { command: "claude-dashboard-pane" }, async ($, e) => {
+  on("command.run", { command: "agent-dashboard-pane" }, async ($, e) => {
     return { text: await runPaneCommand($, e.args) };
   });
   on("ui.close", { id: "claude-dashboard" }, ($, e, next) => {
@@ -722,7 +722,7 @@ function register(on) {
     syncTicker($);
     return next(e);
   });
-  on("command.run", { command: "claude-dashboard-band" }, async ($, e) => {
+  on("command.run", { command: "agent-dashboard-band" }, async ($, e) => {
     const on2 = resolveToggle(e.args, isBandOn);
     if (on2 === null)
       return { text: strings().bandUsage };
