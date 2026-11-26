@@ -8,7 +8,7 @@
  * @tested scripts/__tests__/gemini-client.test.ts
  */
 
-import { readFile, writeFile, stat } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import { execFile } from 'child_process';
 import os from 'os';
 import path from 'path';
@@ -33,13 +33,7 @@ const MAIN_ACCOUNT_KEY = 'main-account';
 const CODE_ASSIST_ENDPOINT = 'https://cloudcode-pa.googleapis.com';
 const CODE_ASSIST_API_VERSION = 'v1internal';
 
-// Google OAuth endpoints and credentials (from Gemini CLI source)
-// Note: Client secret is safe to embed per Google's installed app guidelines
-const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
-const OAUTH_CLIENT_ID = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com';
-const OAUTH_CLIENT_SECRET = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'; // gitleaks:allow
-
-// Token refresh buffer (refresh 5 minutes before expiry)
+// Do not refresh OAuth tokens here: Gemini CLI owns authentication. Ask the user to sign in again when needed.
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
 /**
@@ -51,11 +45,6 @@ const geminiCacheMap: Map<string, CacheEntry<GeminiUsageLimits>> = new Map();
  * Pending API requests to prevent duplicates
  */
 const pendingRequests: Map<string, Promise<GeminiUsageLimits | null>> = new Map();
-
-/**
- * Pending token refresh requests to prevent duplicates (per token hash)
- */
-const pendingRefreshRequests: Map<string, Promise<GeminiCredentials | null>> = new Map();
 
 /**
  * Cached OAuth credentials with mtime tracking
@@ -259,121 +248,6 @@ function tokenNeedsRefresh(credentials: GeminiCredentials): boolean {
 }
 
 /**
- * Internal refresh token implementation
- */
-async function refreshTokenInternal(credentials: GeminiCredentials): Promise<GeminiCredentials | null> {
-  try {
-    debugLog('gemini', 'refreshTokenInternal: attempting refresh...');
-
-    const response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: credentials.refreshToken!,
-        client_id: OAUTH_CLIENT_ID,
-        client_secret: OAUTH_CLIENT_SECRET,
-      }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
-
-    if (!response.ok) {
-      debugLog('gemini', 'refreshTokenInternal: failed', response.status);
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (!data.access_token) {
-      debugLog('gemini', 'refreshTokenInternal: no access_token in response');
-      return null;
-    }
-
-    const newCredentials: GeminiCredentials = {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token || credentials.refreshToken,
-      expiryDate: Date.now() + (data.expires_in * 1000),
-    };
-
-    // Save to file
-    await saveCredentialsToFile(newCredentials, data);
-
-    // Clear cached credentials to force reload
-    cachedCredentials = null;
-
-    debugLog('gemini', 'refreshTokenInternal: success, new expiry', new Date(newCredentials.expiryDate!).toISOString());
-
-    return newCredentials;
-  } catch (err) {
-    debugLog('gemini', 'refreshTokenInternal: error', err);
-    return null;
-  }
-}
-
-/**
- * Refresh OAuth token using refresh_token with deduplication
- * Returns new credentials or null if refresh fails
- */
-async function refreshToken(credentials: GeminiCredentials): Promise<GeminiCredentials | null> {
-  if (!credentials.refreshToken) {
-    debugLog('gemini', 'refreshToken: no refresh token available');
-    return null;
-  }
-
-  const tokenHash = hashToken(credentials.accessToken);
-
-  // Return pending request if one exists for this token
-  const pending = pendingRefreshRequests.get(tokenHash);
-  if (pending) {
-    debugLog('gemini', 'refreshToken: using pending refresh request');
-    return pending;
-  }
-
-  // Create and track new refresh request
-  const refreshPromise = refreshTokenInternal(credentials).finally(() => {
-    pendingRefreshRequests.delete(tokenHash);
-  });
-  pendingRefreshRequests.set(tokenHash, refreshPromise);
-
-  return refreshPromise;
-}
-
-/**
- * Save refreshed credentials to file
- */
-async function saveCredentialsToFile(credentials: GeminiCredentials, rawResponse: Record<string, unknown>): Promise<void> {
-  try {
-    const oauthPath = path.join(getGeminiDir(), OAUTH_CREDS_FILE);
-
-    // Read existing file to preserve other fields
-    let existingData: Record<string, unknown> = {};
-    try {
-      const raw = await readFile(oauthPath, 'utf-8');
-      existingData = JSON.parse(raw);
-    } catch {
-      // File doesn't exist or invalid JSON
-    }
-
-    // Update with new token data
-    const newData = {
-      ...existingData,
-      access_token: credentials.accessToken,
-      refresh_token: credentials.refreshToken,
-      expiry_date: credentials.expiryDate,
-      token_type: rawResponse.token_type || 'Bearer',
-      scope: rawResponse.scope || existingData.scope,
-    };
-
-    await writeFile(oauthPath, JSON.stringify(newData, null, 2), { mode: 0o600 });
-    debugLog('gemini', 'saveCredentialsToFile: saved');
-  } catch (err) {
-    debugLog('gemini', 'saveCredentialsToFile: error', err);
-  }
-}
-
-/**
  * Get valid credentials, refreshing if necessary
  */
 async function getValidCredentials(): Promise<GeminiCredentials | null> {
@@ -383,15 +257,9 @@ async function getValidCredentials(): Promise<GeminiCredentials | null> {
     return null;
   }
 
-  // Check if token needs refresh
+  // Gemini CLI owns token refresh. Do not send refresh tokens or embed OAuth client credentials.
   if (tokenNeedsRefresh(credentials)) {
-    debugLog('gemini', 'getValidCredentials: token expired or expiring, attempting refresh');
-    const refreshedCreds = await refreshToken(credentials);
-    if (refreshedCreds) {
-      return refreshedCreds;
-    }
-    // Refresh failed, return null (token is invalid)
-    debugLog('gemini', 'getValidCredentials: refresh failed');
+    debugLog('gemini', 'getValidCredentials: token expired or expiring; please run Gemini CLI login again');
     return null;
   }
 
@@ -719,7 +587,6 @@ async function fetchFromGeminiApi(
 export function clearGeminiCache(): void {
   geminiCacheMap.clear();
   projectIdCacheMap.clear();
-  pendingRefreshRequests.clear();
   cachedCredentials = null;
   cachedSettings = null;
   keychainCache = null;

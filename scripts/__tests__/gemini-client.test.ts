@@ -223,14 +223,11 @@ describe('gemini-client', () => {
     });
   });
 
-  describe('token refresh deduplication', () => {
-    it('should deduplicate concurrent refresh requests', async () => {
-      // Token refresh now uses pendingRefreshRequests Map to prevent duplicates
-      // Multiple concurrent refresh calls should share a single request
+  describe('token expiry handling', () => {
+    it('does not implement OAuth refresh in the dashboard', async () => {
       const { clearGeminiCache } = await import('../utils/gemini-client.js');
       clearGeminiCache();
-
-      // Implementation verified: pendingRefreshRequests.get(tokenHash) check in refreshToken()
+      // Gemini CLI owns login and token refresh; the dashboard never embeds client credentials.
       expect(true).toBe(true);
     });
   });

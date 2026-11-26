@@ -395,53 +395,9 @@ describe('antigravity-client', () => {
     });
   });
 
-  describe('token refresh', () => {
-    it('should refresh an expired token and never write agy token file', async () => {
-      const writeSpy = mockFs(NANO_PAST_EXPIRY);
-      const saveSpy = mockFileCache();
-      const fetchMock = mockCloudFetch();
-
-      const { fetchAntigravityUsage } = await importClient();
-      const result = await fetchAntigravityUsage();
-
-      expect(result).not.toBeNull();
-
-      const oauthCalls = fetchMock.mock.calls.filter(([u]) => String(u).includes('oauth2.googleapis.com'));
-      expect(oauthCalls).toHaveLength(1);
-
-      // Subsequent API calls must use the refreshed access token
-      const loadCall = fetchMock.mock.calls.find(([u]) => String(u).includes(':loadCodeAssist'));
-      const headers = (loadCall?.[1] as RequestInit | undefined)?.headers as Record<string, string>;
-      expect(headers['Authorization']).toBe('Bearer refreshed-token');
-
-      // Refreshed token persisted only to our own cache, agy's file untouched
-      expect(saveSpy).toHaveBeenCalledWith(
-        expect.stringContaining('antigravity-token-'),
-        expect.objectContaining({ accessToken: 'refreshed-token' })
-      );
-      expect(writeSpy).not.toHaveBeenCalled();
-    });
-
-    it('should return null and persist a backoff marker when refresh fails', async () => {
+  describe('token expiry handling', () => {
+    it('does not refresh OAuth tokens and asks the CLI owner to sign in again', async () => {
       mockFs(NANO_PAST_EXPIRY);
-      const saveSpy = mockFileCache();
-      const fetchMock = mockCloudFetch({ refreshStatus: 400 });
-
-      const { fetchAntigravityUsage } = await importClient();
-      const result = await fetchAntigravityUsage();
-
-      expect(result).toBeNull();
-      const cloudCalls = fetchMock.mock.calls.filter(([u]) => String(u).includes('cloudcode-pa'));
-      expect(cloudCalls).toHaveLength(0);
-      expect(saveSpy).toHaveBeenCalledWith(
-        expect.stringContaining('antigravity-token-'),
-        expect.objectContaining({ refreshFailedAt: expect.any(Number) })
-      );
-    });
-
-    it('should back off refresh retries after a recent failure', async () => {
-      mockFs(NANO_PAST_EXPIRY);
-      mockFileCache(tokenCacheOnly({ refreshFailedAt: Date.now() - 1_000 }));
       const fetchMock = mockCloudFetch();
 
       const { fetchAntigravityUsage } = await importClient();
@@ -477,7 +433,7 @@ describe('antigravity-client', () => {
       expect(result).toEqual(stale);
     });
 
-    it('should reuse a previously refreshed token from the file cache', async () => {
+    it('does not reuse dashboard-managed refreshed token cache', async () => {
       mockFs(NANO_PAST_EXPIRY);
       mockFileCache(
         tokenCacheOnly({ accessToken: 'cached-refresh-access', expiryDate: Date.now() + 3_600_000 })
@@ -487,13 +443,8 @@ describe('antigravity-client', () => {
       const { fetchAntigravityUsage } = await importClient();
       const result = await fetchAntigravityUsage();
 
-      expect(result).not.toBeNull();
-      const oauthCalls = fetchMock.mock.calls.filter(([u]) => String(u).includes('oauth2.googleapis.com'));
-      expect(oauthCalls).toHaveLength(0);
-
-      const loadCall = fetchMock.mock.calls.find(([u]) => String(u).includes(':loadCodeAssist'));
-      const headers = (loadCall?.[1] as RequestInit | undefined)?.headers as Record<string, string>;
-      expect(headers['Authorization']).toBe('Bearer cached-refresh-access');
+      expect(result).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 

@@ -39,13 +39,7 @@ const CODE_ASSIST_METADATA = {
 };
 const USER_AGENT = 'antigravity';
 
-// Google OAuth endpoint and Antigravity's OAuth client credentials
-// Note: Client secret is safe to embed per Google's installed app guidelines
-const GOOGLE_TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
-const OAUTH_CLIENT_ID = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com';
-const OAUTH_CLIENT_SECRET = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'; // gitleaks:allow
-
-// Token refresh buffer (refresh 5 minutes before expiry)
+// Antigravity CLI owns OAuth refresh. The dashboard only reads its current token.
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
 /**
@@ -59,11 +53,6 @@ const antigravityCacheMap: Map<string, CacheEntry<AntigravityUsageLimits>> = new
  * the network call — both antigravity widgets consume the same limits object.
  */
 let inFlightFetch: Promise<AntigravityUsageLimits | null> | null = null;
-
-/**
- * Pending token refresh requests, keyed by refresh-token hash
- */
-const pendingRefreshRequests: Map<string, Promise<AntigravityCredentials | null>> = new Map();
 
 /**
  * Memoized install check — the token file cannot appear mid-render
@@ -200,181 +189,16 @@ function accountKeyFor(credentials: AntigravityCredentials): string {
 }
 
 /**
- * Cross-process cache path for refreshed access tokens
- */
-function refreshedTokenCachePath(accountKey: string): string {
-  return fileCachePath(`antigravity-token-${accountKey}.json`);
-}
-
-interface RefreshedTokenCache {
-  accessToken?: string;
-  expiryDate?: number;
-  /** Set when the last refresh attempt failed — cross-process retry backoff */
-  refreshFailedAt?: number;
-}
-
-/**
- * Reuse a previously refreshed access token from the cross-process file cache.
- * Statusline renders spawn a fresh process each time, so refresh backoff must
- * live in the file cache — returns 'backoff' while it is active.
- */
-async function getCachedRefreshedCredentials(
-  refreshTokenValue: string,
-  accountKey: string
-): Promise<AntigravityCredentials | 'backoff' | null> {
-  const fromFile = await loadFileCache<RefreshedTokenCache>(
-    refreshedTokenCachePath(accountKey),
-    STALE_CACHE_TTL_SECONDS
-  );
-  if (!fromFile?.data) {
-    return null;
-  }
-  if (
-    fromFile.data.refreshFailedAt !== undefined &&
-    (Date.now() - fromFile.data.refreshFailedAt) / 1000 < NEGATIVE_CACHE_SECONDS
-  ) {
-    debugLog('antigravity', 'refresh backoff active, skipping refresh attempt');
-    return 'backoff';
-  }
-  if (!fromFile.data.accessToken) {
-    return null;
-  }
-
-  const creds: AntigravityCredentials = {
-    accessToken: fromFile.data.accessToken,
-    refreshToken: refreshTokenValue,
-    expiryDate: fromFile.data.expiryDate,
-  };
-  return tokenNeedsRefresh(creds) ? null : creds;
-}
-
-/**
- * Persist a refresh failure marker for cross-process backoff
- */
-async function recordRefreshFailure(accountKey: string): Promise<void> {
-  await saveFileCache(refreshedTokenCachePath(accountKey), {
-    refreshFailedAt: Date.now(),
-  });
-}
-
-/**
- * Internal refresh implementation. The refreshed token is kept in our own
- * cache only — agy's credential file is never written back (a foreign writer
- * could corrupt what the closed-source CLI expects).
- */
-async function refreshTokenInternal(
-  refreshTokenValue: string,
-  accountKey: string
-): Promise<AntigravityCredentials | null> {
-  try {
-    debugLog('antigravity', 'refreshTokenInternal: attempting refresh...');
-
-    const response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshTokenValue,
-        client_id: OAUTH_CLIENT_ID,
-        client_secret: OAUTH_CLIENT_SECRET,
-      }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
-
-    if (!response.ok) {
-      debugLog('antigravity', 'refreshTokenInternal: failed', response.status);
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (!data.access_token) {
-      debugLog('antigravity', 'refreshTokenInternal: no access_token in response');
-      return null;
-    }
-
-    // Google always sends a numeric expires_in, but a missing/NaN value would
-    // make tokenNeedsRefresh() treat the token as valid forever
-    const expiresInMs = typeof data.expires_in === 'number' && Number.isFinite(data.expires_in)
-      ? data.expires_in * 1000
-      : 3_600_000;
-
-    const newCredentials: AntigravityCredentials = {
-      accessToken: data.access_token,
-      refreshToken: refreshTokenValue,
-      expiryDate: Date.now() + expiresInMs,
-    };
-
-    await saveFileCache(refreshedTokenCachePath(accountKey), {
-      accessToken: newCredentials.accessToken,
-      expiryDate: newCredentials.expiryDate,
-    });
-
-    debugLog('antigravity', 'refreshTokenInternal: success');
-    return newCredentials;
-  } catch (err) {
-    debugLog('antigravity', 'refreshTokenInternal: error', err);
-    return null;
-  }
-}
-
-/**
- * Refresh OAuth token with deduplication (per refresh-token hash).
- * A failed attempt persists the cross-process backoff marker.
- */
-function refreshToken(
-  refreshTokenValue: string,
-  accountKey: string
-): Promise<AntigravityCredentials | null> {
-  const pending = pendingRefreshRequests.get(accountKey);
-  if (pending) {
-    debugLog('antigravity', 'refreshToken: using pending refresh request');
-    return pending;
-  }
-
-  const refreshPromise = (async () => {
-    const refreshed = await refreshTokenInternal(refreshTokenValue, accountKey);
-    if (!refreshed) {
-      await recordRefreshFailure(accountKey);
-    }
-    return refreshed;
-  })().finally(() => {
-    pendingRefreshRequests.delete(accountKey);
-  });
-  pendingRefreshRequests.set(accountKey, refreshPromise);
-
-  return refreshPromise;
-}
-
-/**
  * Get valid credentials: fresh file token first (agy keeps it current while
  * in use), then a previously refreshed token, then a new refresh.
  */
-async function getValidCredentials(
-  fileCreds: AntigravityCredentials,
-  accountKey: string
-): Promise<AntigravityCredentials | null> {
+async function getValidCredentials(fileCreds: AntigravityCredentials): Promise<AntigravityCredentials | null> {
   if (!tokenNeedsRefresh(fileCreds)) {
     return fileCreds;
   }
 
-  if (!fileCreds.refreshToken) {
-    debugLog('antigravity', 'getValidCredentials: token expired, no refresh token');
-    return null;
-  }
-
-  const reused = await getCachedRefreshedCredentials(fileCreds.refreshToken, accountKey);
-  if (reused === 'backoff') {
-    return null;
-  }
-  if (reused) {
-    return reused;
-  }
-
-  debugLog('antigravity', 'getValidCredentials: token expired, attempting refresh');
-  return refreshToken(fileCreds.refreshToken, accountKey);
+  debugLog('antigravity', 'getValidCredentials: token expired or expiring; please run Antigravity CLI login again');
+  return null;
 }
 
 /**
@@ -601,7 +425,7 @@ async function fetchAntigravityUsageInternal(ttlSeconds: number): Promise<Antigr
     return staleFallback();
   }
 
-  const credentials = await getValidCredentials(fileCreds, accountKey);
+  const credentials = await getValidCredentials(fileCreds);
   if (!credentials) {
     debugLog('antigravity', 'fetchAntigravityUsage: no valid credentials, serving stale');
     return staleFallback();
@@ -726,7 +550,6 @@ async function fetchFromAntigravityApi(
 export function clearAntigravityCache(): void {
   antigravityCacheMap.clear();
   projectMetaCacheMap.clear();
-  pendingRefreshRequests.clear();
   inFlightFetch = null;
   installedCheck = null;
   cachedCredentials = null;

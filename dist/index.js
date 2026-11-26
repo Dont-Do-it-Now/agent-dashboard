@@ -3339,7 +3339,7 @@ var codexUsageWidget = {
 };
 
 // scripts/utils/gemini-client.ts
-import { readFile as readFile8, writeFile as writeFile3, stat as stat8 } from "fs/promises";
+import { readFile as readFile8, stat as stat8 } from "fs/promises";
 import { execFile as execFile5 } from "child_process";
 import os3 from "os";
 import path3 from "path";
@@ -3351,13 +3351,9 @@ var KEYCHAIN_SERVICE_NAME = "gemini-cli-oauth";
 var MAIN_ACCOUNT_KEY = "main-account";
 var CODE_ASSIST_ENDPOINT = "https://cloudcode-pa.googleapis.com";
 var CODE_ASSIST_API_VERSION = "v1internal";
-var GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
-var OAUTH_CLIENT_ID = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com";
-var OAUTH_CLIENT_SECRET = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 var TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1e3;
 var geminiCacheMap = /* @__PURE__ */ new Map();
 var pendingRequests4 = /* @__PURE__ */ new Map();
-var pendingRefreshRequests = /* @__PURE__ */ new Map();
 var cachedCredentials = null;
 var keychainCache = null;
 var KEYCHAIN_CACHE_TTL_MS2 = 1e4;
@@ -3460,97 +3456,13 @@ function tokenNeedsRefresh(credentials) {
   }
   return credentials.expiryDate < Date.now() + TOKEN_REFRESH_BUFFER_MS;
 }
-async function refreshTokenInternal(credentials) {
-  try {
-    debugLog("gemini", "refreshTokenInternal: attempting refresh...");
-    const response = await fetch(GOOGLE_TOKEN_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: credentials.refreshToken,
-        client_id: OAUTH_CLIENT_ID,
-        client_secret: OAUTH_CLIENT_SECRET
-      }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS3)
-    });
-    if (!response.ok) {
-      debugLog("gemini", "refreshTokenInternal: failed", response.status);
-      return null;
-    }
-    const data = await response.json();
-    if (!data.access_token) {
-      debugLog("gemini", "refreshTokenInternal: no access_token in response");
-      return null;
-    }
-    const newCredentials = {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token || credentials.refreshToken,
-      expiryDate: Date.now() + data.expires_in * 1e3
-    };
-    await saveCredentialsToFile(newCredentials, data);
-    cachedCredentials = null;
-    debugLog("gemini", "refreshTokenInternal: success, new expiry", new Date(newCredentials.expiryDate).toISOString());
-    return newCredentials;
-  } catch (err) {
-    debugLog("gemini", "refreshTokenInternal: error", err);
-    return null;
-  }
-}
-async function refreshToken(credentials) {
-  if (!credentials.refreshToken) {
-    debugLog("gemini", "refreshToken: no refresh token available");
-    return null;
-  }
-  const tokenHash = hashToken(credentials.accessToken);
-  const pending = pendingRefreshRequests.get(tokenHash);
-  if (pending) {
-    debugLog("gemini", "refreshToken: using pending refresh request");
-    return pending;
-  }
-  const refreshPromise = refreshTokenInternal(credentials).finally(() => {
-    pendingRefreshRequests.delete(tokenHash);
-  });
-  pendingRefreshRequests.set(tokenHash, refreshPromise);
-  return refreshPromise;
-}
-async function saveCredentialsToFile(credentials, rawResponse) {
-  try {
-    const oauthPath = path3.join(getGeminiDir(), OAUTH_CREDS_FILE);
-    let existingData = {};
-    try {
-      const raw = await readFile8(oauthPath, "utf-8");
-      existingData = JSON.parse(raw);
-    } catch {
-    }
-    const newData = {
-      ...existingData,
-      access_token: credentials.accessToken,
-      refresh_token: credentials.refreshToken,
-      expiry_date: credentials.expiryDate,
-      token_type: rawResponse.token_type || "Bearer",
-      scope: rawResponse.scope || existingData.scope
-    };
-    await writeFile3(oauthPath, JSON.stringify(newData, null, 2), { mode: 384 });
-    debugLog("gemini", "saveCredentialsToFile: saved");
-  } catch (err) {
-    debugLog("gemini", "saveCredentialsToFile: error", err);
-  }
-}
 async function getValidCredentials() {
   let credentials = await getGeminiCredentials();
   if (!credentials) {
     return null;
   }
   if (tokenNeedsRefresh(credentials)) {
-    debugLog("gemini", "getValidCredentials: token expired or expiring, attempting refresh");
-    const refreshedCreds = await refreshToken(credentials);
-    if (refreshedCreds) {
-      return refreshedCreds;
-    }
-    debugLog("gemini", "getValidCredentials: refresh failed");
+    debugLog("gemini", "getValidCredentials: token expired or expiring; please run Gemini CLI login again");
     return null;
   }
   return credentials;
@@ -3889,13 +3801,9 @@ var CODE_ASSIST_METADATA = {
   pluginType: "GEMINI"
 };
 var USER_AGENT = "antigravity";
-var GOOGLE_TOKEN_ENDPOINT2 = "https://oauth2.googleapis.com/token";
-var OAUTH_CLIENT_ID2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.apps.googleusercontent.com";
-var OAUTH_CLIENT_SECRET2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 var TOKEN_REFRESH_BUFFER_MS2 = 5 * 60 * 1e3;
 var antigravityCacheMap = /* @__PURE__ */ new Map();
 var inFlightFetch = null;
-var pendingRefreshRequests2 = /* @__PURE__ */ new Map();
 var installedCheck = null;
 var cachedCredentials2 = null;
 var cachedSettings2 = null;
@@ -3952,113 +3860,12 @@ function tokenNeedsRefresh2(credentials) {
 function accountKeyFor(credentials) {
   return hashToken(credentials.refreshToken ?? credentials.accessToken);
 }
-function refreshedTokenCachePath(accountKey) {
-  return fileCachePath(`antigravity-token-${accountKey}.json`);
-}
-async function getCachedRefreshedCredentials(refreshTokenValue, accountKey) {
-  const fromFile = await loadFileCache(
-    refreshedTokenCachePath(accountKey),
-    STALE_CACHE_TTL_SECONDS
-  );
-  if (!fromFile?.data) {
-    return null;
-  }
-  if (fromFile.data.refreshFailedAt !== void 0 && (Date.now() - fromFile.data.refreshFailedAt) / 1e3 < NEGATIVE_CACHE_SECONDS) {
-    debugLog("antigravity", "refresh backoff active, skipping refresh attempt");
-    return "backoff";
-  }
-  if (!fromFile.data.accessToken) {
-    return null;
-  }
-  const creds = {
-    accessToken: fromFile.data.accessToken,
-    refreshToken: refreshTokenValue,
-    expiryDate: fromFile.data.expiryDate
-  };
-  return tokenNeedsRefresh2(creds) ? null : creds;
-}
-async function recordRefreshFailure(accountKey) {
-  await saveFileCache(refreshedTokenCachePath(accountKey), {
-    refreshFailedAt: Date.now()
-  });
-}
-async function refreshTokenInternal2(refreshTokenValue, accountKey) {
-  try {
-    debugLog("antigravity", "refreshTokenInternal: attempting refresh...");
-    const response = await fetch(GOOGLE_TOKEN_ENDPOINT2, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: refreshTokenValue,
-        client_id: OAUTH_CLIENT_ID2,
-        client_secret: OAUTH_CLIENT_SECRET2
-      }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS4)
-    });
-    if (!response.ok) {
-      debugLog("antigravity", "refreshTokenInternal: failed", response.status);
-      return null;
-    }
-    const data = await response.json();
-    if (!data.access_token) {
-      debugLog("antigravity", "refreshTokenInternal: no access_token in response");
-      return null;
-    }
-    const expiresInMs = typeof data.expires_in === "number" && Number.isFinite(data.expires_in) ? data.expires_in * 1e3 : 36e5;
-    const newCredentials = {
-      accessToken: data.access_token,
-      refreshToken: refreshTokenValue,
-      expiryDate: Date.now() + expiresInMs
-    };
-    await saveFileCache(refreshedTokenCachePath(accountKey), {
-      accessToken: newCredentials.accessToken,
-      expiryDate: newCredentials.expiryDate
-    });
-    debugLog("antigravity", "refreshTokenInternal: success");
-    return newCredentials;
-  } catch (err) {
-    debugLog("antigravity", "refreshTokenInternal: error", err);
-    return null;
-  }
-}
-function refreshToken2(refreshTokenValue, accountKey) {
-  const pending = pendingRefreshRequests2.get(accountKey);
-  if (pending) {
-    debugLog("antigravity", "refreshToken: using pending refresh request");
-    return pending;
-  }
-  const refreshPromise = (async () => {
-    const refreshed = await refreshTokenInternal2(refreshTokenValue, accountKey);
-    if (!refreshed) {
-      await recordRefreshFailure(accountKey);
-    }
-    return refreshed;
-  })().finally(() => {
-    pendingRefreshRequests2.delete(accountKey);
-  });
-  pendingRefreshRequests2.set(accountKey, refreshPromise);
-  return refreshPromise;
-}
-async function getValidCredentials2(fileCreds, accountKey) {
+async function getValidCredentials2(fileCreds) {
   if (!tokenNeedsRefresh2(fileCreds)) {
     return fileCreds;
   }
-  if (!fileCreds.refreshToken) {
-    debugLog("antigravity", "getValidCredentials: token expired, no refresh token");
-    return null;
-  }
-  const reused = await getCachedRefreshedCredentials(fileCreds.refreshToken, accountKey);
-  if (reused === "backoff") {
-    return null;
-  }
-  if (reused) {
-    return reused;
-  }
-  debugLog("antigravity", "getValidCredentials: token expired, attempting refresh");
-  return refreshToken2(fileCreds.refreshToken, accountKey);
+  debugLog("antigravity", "getValidCredentials: token expired or expiring; please run Antigravity CLI login again");
+  return null;
 }
 async function getAntigravitySettings() {
   try {
@@ -4206,7 +4013,7 @@ async function fetchAntigravityUsageInternal(ttlSeconds) {
     debugLog("antigravity", "cross-process negative cache hit, skipping API call");
     return staleFallback();
   }
-  const credentials = await getValidCredentials2(fileCreds, accountKey);
+  const credentials = await getValidCredentials2(fileCreds);
   if (!credentials) {
     debugLog("antigravity", "fetchAntigravityUsage: no valid credentials, serving stale");
     return staleFallback();
@@ -4737,7 +4544,7 @@ var forecastWidget = {
 };
 
 // scripts/utils/budget.ts
-import { readFile as readFile10, mkdir as mkdir4, writeFile as writeFile4 } from "fs/promises";
+import { readFile as readFile10, mkdir as mkdir4, writeFile as writeFile3 } from "fs/promises";
 import { join as join6 } from "path";
 import { homedir as homedir3 } from "os";
 var BUDGET_DIR = join6(homedir3(), ".cache", "claude-dashboard");
@@ -4772,7 +4579,7 @@ async function saveBudgetState(state) {
       await mkdir4(BUDGET_DIR, { recursive: true });
       dirEnsured = true;
     }
-    await writeFile4(BUDGET_FILE, JSON.stringify(state), "utf-8");
+    await writeFile3(BUDGET_FILE, JSON.stringify(state), "utf-8");
     budgetCache = state;
   } catch (error) {
     debugLog("budget", "Failed to save budget state", error);
@@ -5870,7 +5677,7 @@ function displayWidth(text) {
 }
 
 // scripts/utils/band-marker.ts
-import { mkdir as mkdir5, writeFile as writeFile5, unlink as unlink3, stat as stat12 } from "fs/promises";
+import { mkdir as mkdir5, writeFile as writeFile4, unlink as unlink3, stat as stat12 } from "fs/promises";
 import path5 from "path";
 var BAND_MARKER_TTL_MS = 18e4;
 var SAFE_SESSION_ID = /^[A-Za-z0-9-]{1,128}$/;
@@ -5884,7 +5691,7 @@ async function markBand(sessionId, dir = FILE_CACHE_DIR) {
   if (!file)
     return;
   await mkdir5(dir, { recursive: true });
-  await writeFile5(file, String(Date.now()));
+  await writeFile4(file, String(Date.now()));
 }
 async function clearBand(sessionId, dir = FILE_CACHE_DIR) {
   const file = bandMarkerPath(sessionId, dir);
