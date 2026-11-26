@@ -68,6 +68,11 @@ open `/statusline` once and select `Agent Dashboard`; the selection is persisted
 the footer then refreshes automatically. Ask Codex to use the `agent-dashboard` Skill
 for setup or supported-field guidance.
 
+Run `codex plugin add` only on the first installation. If the plugin is already
+listed, the command may try to replace an active cache directory and fail with an
+access-denied backup error. Close all Codex sessions before removing and reinstalling
+an existing version; otherwise leave the enabled installation in place.
+
 ### Manual Installation
 
 ```bash
