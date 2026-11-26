@@ -11,23 +11,25 @@ Agent Dashboard is a comprehensive status line plugin for Claude Code with unifi
 |---|---:|---|---|
 | Claude Code | v1.0.80+ | Native `statusLine.command`, plugin commands, lifecycle hooks, usage/context/cost/rate-limit widgets | Supported |
 | Claude Code | v2.1.332 verified | Effort/model fields, lifecycle event mapping, extension policy and retry countdown display | Verified locally |
-| Codex CLI | v0.171.0+ | Official experimental custom statusline host capability exists; this repository provides the shared renderer contract and Codex usage collector | Host adapter pending |
+| Codex CLI | v0.171.0+ | Native `agent-dashboard` Codex plugin package with setup/status Skill | Supported |
 | Codex CLI | v0.172.0 verified | `queue --thread --message` can target an existing session when invoked manually | Manual queue only; no native scheduler |
 
-Agent Dashboard does not claim automatic quota resume, delayed prompt injection, or Codex native plugin rendering until those host APIs are verified. Unsupported automation remains disabled and is documented as manual guidance.
+Agent Dashboard does not claim automatic quota resume, delayed prompt injection, or Codex TUI statusline rendering. Unsupported automation remains disabled and is documented as manual guidance.
 
 ## Installation
 
 **Requirements:** Node.js 18+.
 
-For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code v2.1.332 is the locally verified extension baseline. Codex CLI support is version-gated separately: v0.171.0 introduced the experimental custom-statusline host capability, and v0.172.0 is the locally verified queue command baseline. The Codex host adapter is not yet enabled, so Codex usage display and renderer contracts must not be described as a completed native Codex plugin.
+For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code v2.1.332 is the locally verified extension baseline. Codex CLI plugin installation requires a version with `codex plugin` and `skills` support; Codex CLI v0.172.0 is locally verified. The Codex plugin provides native Skills, while the separate experimental TUI statusline host remains disabled unless explicitly supported by the installed Codex release.
+
+`npx` is not required for either host. Use Claude's `/plugin` commands for Claude Code and Codex's `codex plugin` commands for Codex CLI.
 
 ### Claude and Codex compatibility
 
 The existing Claude renderer uses Claude Code's `statusLine.command` interface.
 Codex's custom MCP footer is a separate, experimental host interface; the presence
 of the `codexUsage` widget in this plugin does not mean it renders inside Codex.
-This fork's Codex MCP adapter and actual host compatibility are still pending.
+The Codex package is a native Skills plugin. It does not add an MCP server, wrapper, daemon, or external service. The shared statusline renderer is not automatically injected into Codex's TUI.
 
 | Codex CLI release | Official custom-statusline milestone |
 | --- | --- |
@@ -51,6 +53,17 @@ is required before those steps can be used for Agent Dashboard.
 /plugin install agent-dashboard
 /agent-dashboard:setup
 ```
+
+### Codex CLI plugin
+
+```bash
+codex plugin marketplace add Dont-Do-it-Now/agent-dashboard
+codex plugin add agent-dashboard@agent-dashboard
+```
+
+Verify the installation with `codex plugin list --json`; the entry should show
+`agent-dashboard@agent-dashboard` with `enabled: true`. Then ask Codex to use the
+`agent-dashboard` Skill for setup or supported-field guidance.
 
 ### Manual Installation
 
