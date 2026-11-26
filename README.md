@@ -125,6 +125,7 @@ Multi-provider support: z.ai/ZHIPU, Codex, Gemini, Antigravity auto-detected whe
 | | `tokenSpeedLast` | Output token generation speed of the most recent response only |
 | | `todayCost` | Total spending across all sessions today |
 | **Status** | `peakHours` | Peak hours indicator with countdown ([based on PeakClaude](https://github.com/pforret/PeakClaude))⁶ |
+| | `retryCountdown` | Optional WAIT/QUEUED/RESUMING/MANUAL countdown; hidden unless extension retry is explicitly enabled and a host adapter provides status |
 | | `tagStatus` | Commits ahead of matched git tags (default pattern `v*`, customize via `tagPatterns`)⁷ |
 | | `slashCommand` | Active slash command for the current turn (🎯), cleared by next plain-text message |
 | | `agentMode` | Session agent identity: 👤 custom agent (via `/agent <name>`) or 🤖 subagent type |
@@ -138,6 +139,24 @@ Multi-provider support: z.ai/ZHIPU, Codex, Gemini, Antigravity auto-detected whe
 > ² Auto-hides if `~/.codex/auth.json` not found. ³ Auto-hides if `~/.gemini/oauth_creds.json` not found — Gemini CLI personal tiers were retired 2026-06-18 in favor of Antigravity CLI (enterprise still supported). ⁴ Auto-hides if not detected via `ANTHROPIC_BASE_URL`. ⁵ Requires `"dailyBudget"` in config. ⁶ Peak = weekdays 5-11 AM PT; shows countdown to next transition. ⁷ Uses `tagPatterns` config (default `["v*"]`); auto-hides when no pattern matches a reachable tag. ⁸ Auto-hides if `~/.gemini/antigravity-cli/antigravity-oauth-token` not found.
 
 i18n: English and Korean supported (auto-detect or set via setup).
+
+### Extension settings and host limits
+
+The optional `extension` object is stored in `~/.claude/claude-dashboard.local.json`. Existing settings remain valid; automatic behavior is OFF unless explicitly enabled. Invalid automation values are disabled and reported by diagnostics. A minimal example is:
+
+```json
+{
+  "extension": {
+    "forecast": { "enabled": true, "windowMinutes": 60, "minSamples": 3, "warningPercent": 85 },
+    "adaptive": { "mode": "warn", "providers": { "claude": { "levels": [] }, "codex": { "levels": [] } } },
+    "retry": { "enabled": false, "resetDelaySeconds": 60, "maxAttempts": 3, "maxWaitMinutes": 360, "verifyReset": true }
+  }
+}
+```
+
+This release does not claim automatic quota resume, delayed prompt injection, or host setting mutation. Claude Code 2.1.332 exposes `--resume`, `--model`, and `--effort`, but no verified quota scheduler. Codex CLI 0.172.0 exposes `queue --thread --message` (and optional `--resume`), but no verified native delayed scheduler or automatic quota unpause. After a reset, use the host's documented resume/queue command manually. The `retryCountdown` widget is display-only and does not keep a process alive.
+
+For diagnostics, inspect the installed Claude/Codex versions and run the existing `/claude-dashboard:setup` or `/claude-dashboard:update` command. Do not edit Claude host settings to enable unsupported automation.
 
 ## Configuration
 
