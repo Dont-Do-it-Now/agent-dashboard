@@ -1,0 +1,367 @@
+---
+title: 위젯 레퍼런스
+description: 각 위젯의 상세 데이터 및 동작 설명
+sidebar:
+  order: 2
+---
+
+각 위젯의 데이터 소스, 표시 내용, 출력 예시를 상세하게 설명합니다.
+
+## Core
+
+### model
+
+- **ID**: `model`
+- **데이터 소스**: stdin (모델 정보, 실시간 `effort.level` / `fast_mode`) + settings.json 폴백
+- **표시 내용**: 모델 이름·버전과 이모지. 버전은 `display_name`에서 읽으며(`Opus 5 (1M context)` → `Opus 5`), 없으면 이름만 표시합니다. Opus/Sonnet/Fable의 경우 effort 수준(MAX=max, X=xhigh, H=high, M=medium, L=low)을 표시합니다. Opus에서 빠른 모드가 활성화되면 (↯) 기호를 추가합니다. Claude Code가 stdin으로 보내는 실시간 `effort.level` / `fast_mode`를 우선 사용하므로 세션 중 `/effort` 변경과 세션 한정 선택이 그대로 반영되며, 이 필드가 없는 구버전 Claude Code에서는 `settings.json`으로 폴백합니다.
+- **출력 예시**: `◆ Opus 5.5(X)`, `◆ Opus 5.5(X) ↯`, `◆ Sonnet 5(M)`, `◆ Haiku 4.5`
+
+### context
+
+- **ID**: `context`
+- **데이터 소스**: stdin (context_window)
+- **표시 내용**: 프로그레스 바와 백분율, 총 토큰 수. 사용률에 따라 색상이 변경됩니다.
+  - 🟢 0-50%: 안전
+  - 🟡 51-80%: 주의
+  - 🔴 81-100%: 위험
+- **출력 예시**: `██████░░░░ 58% 120K`
+
+### contextBar / contextPercentage / contextUsage
+
+`context`의 세 구성 요소 중 하나만 표시하는 서브 위젯입니다. 분할 터미널처럼 공간이 좁은 환경에서 필요한 정보만 골라 status line을 컴팩트하게 유지할 수 있습니다. 모든 서브 위젯은 `context`와 동일한 데이터 소스를 공유하므로 색상과 백분율이 항상 일치합니다.
+
+| 위젯 ID | 표시 내용 |
+|---------|-----------|
+| `contextBar` | 프로그레스 바만 |
+| `contextPercentage` | 백분율만 (예: `45%`) |
+| `contextUsage` | 토큰 수만 (예: `90K/200K`) |
+
+**예시 레이아웃:**
+```jsonc
+// .claude/claude-dashboard.local.json
+"lines": [
+  ["projectInfo", "contextBar", "contextPercentage", "rateLimit5h"]
+]
+```
+
+### cost
+
+- **ID**: `cost`
+- **데이터 소스**: stdin (cost)
+- **표시 내용**: 현재 세션의 누적 비용을 USD로 표시합니다.
+- **출력 예시**: `$1.25`, `$0.03`
+
+### projectInfo
+
+- **ID**: `projectInfo`
+- **데이터 소스**: stdin (workspace) + git
+- **표시 내용**: 현재 작업 디렉토리 이름, git 브랜치 (remote 설정 시 OSC8 클릭 가능 링크), upstream 대비 ahead/behind 커밋 수. CWD가 프로젝트 루트와 다르면 하위 경로를 표시하고, worktree 세션에서는 worktree 표시기를 보여줍니다.
+- **출력 예시**: `📁 my-project (main)`, `📁 dashboard (feat/widgets ↑3)`, `📁 api (main ↑2↓1)`, `📁 project (src/components) (main)`, `📁 project (main) 🌳 wt:feature-branch`
+
+## Rate Limits
+
+### rateLimit5h
+
+- **ID**: `rateLimit5h`
+- **데이터 소스**: API (OAuth usage 엔드포인트)
+- **표시 내용**: 5시간 사용량. 리셋까지 남은 시간을 카운트다운으로 표시합니다. API 오류 시 경고 기호를 표시합니다. 인증된 Ultra 계정은 5시간 한도가 없어 숨겨집니다.
+- **출력 예시**: `5h: 42%`, `5h: 85% ⏱2h15m`, `5h: ⚠️`
+
+### rateLimit7d
+
+- **ID**: `rateLimit7d`
+- **데이터 소스**: API (OAuth usage 엔드포인트)
+- **표시 내용**: 7일 전체 모델 사용량. Pro 및 Max 플랜에서 표시됩니다.
+- **출력 예시**: `7d: 69%`, `7d: 92% ⏱3d`
+
+### rateLimit7dSonnet
+
+- **ID**: `rateLimit7dSonnet`
+- **데이터 소스**: API (OAuth usage 엔드포인트)
+- **표시 내용**: 7일 Sonnet 모델 사용량. Max 플랜 전용. **~2026-06 지원 중단:** Sonnet 5 출시 시점에 Anthropic이 Sonnet 주간 한도를 통합 주간 버킷에 병합하여, usage API가 null을 반환하는 동안 위젯이 숨겨집니다.
+- **출력 예시**: `7d-S: 55%`
+
+### rateLimit7dFable
+
+- **ID**: `rateLimit7dFable`
+- **데이터 소스**: API (OAuth usage 엔드포인트)
+- **표시 내용**: 7일 Fable 주간 사용량 한도. Max, Ultra 플랜에서 표시됩니다. 평면 필드가 아니라 API의 범용 `limits[]` 배열(`weekly_scoped` 항목)에서만 제공되므로, 계정에 Fable 한도가 없으면 위젯이 숨겨집니다.
+- **출력 예시**: `7d-F: 18%`
+
+## Session
+
+### sessionId
+
+- **ID**: `sessionId`
+- **데이터 소스**: stdin (session_id)
+- **표시 내용**: 현재 세션 ID의 앞 8자를 표시합니다.
+- **출력 예시**: `🔑 a1b2c3d4`
+
+### sessionIdFull
+
+- **ID**: `sessionIdFull`
+- **데이터 소스**: stdin (session_id)
+- **표시 내용**: 현재 세션의 전체 UUID를 표시합니다.
+- **출력 예시**: `🔑 a1b2c3d4-e5f6-7890-abcd-ef1234567890`
+
+### sessionName
+
+- **ID**: `sessionName`
+- **데이터 소스**: transcript (JSONL)
+- **표시 내용**: /rename 명령으로 설정된 세션 이름. 세션 이름이 없으면 위젯이 숨겨집니다.
+- **출력 예시**: `» feature-auth`, `» bug-fix-login`
+
+### sessionDuration
+
+- **ID**: `sessionDuration`
+- **데이터 소스**: 파일 (세션 시작 시간 저장)
+- **표시 내용**: 현재 세션이 시작된 이후 경과 시간.
+- **출력 예시**: `⏱ 45m`, `⏱ 1h30m`, `⏱ 5m`
+
+### lastPrompt
+
+- **ID**: `lastPrompt`
+- **데이터 소스**: transcript (JSONL)
+- **표시 내용**: 현재 세션의 마지막 사용자 프롬프트를 타임스탬프와 함께 표시합니다. 세션 컨텍스트를 빠르게 파악할 수 있습니다. 프롬프트가 없으면 위젯이 숨겨집니다.
+- **출력 예시**: `💬 14:32 미들웨어 인증 버그 수정해줘`, `▸ 09:15 API 클라이언트 유닛 테스트 추가`
+
+### configCounts
+
+- **ID**: `configCounts`
+- **데이터 소스**: 파일시스템
+- **표시 내용**: 프로젝트에 설정된 CLAUDE.md 파일 수, AGENTS.md 파일 수, 규칙 수, MCP 서버 수, 훅 수, 추가 디렉토리 수.
+- **출력 예시**: `CLAUDE.md: 2 │ AGENTS.md: 1 │ Rules: 3 │ MCPs: 1 │ Hooks: 2 │ +Dirs: 2`
+
+## Activity
+
+### toolActivity
+
+- **ID**: `toolActivity`
+- **데이터 소스**: transcript (JSONL)
+- **표시 내용**: 현재 실행 중인 도구와 완료된 도구의 수. 실행 중인 도구는 대상(파일 경로, 명령어 등)과 함께 표시됩니다.
+- **출력 예시**: `⚙️ 12 done`, `⚙️ Read(app.ts) (8 done)`, `⚙️ Read(app.ts), Bash(npm test) (12 done)`
+
+### agentStatus
+
+- **ID**: `agentStatus`
+- **데이터 소스**: transcript (JSONL) + 환경 변수
+- **표시 내용**: 실행 중인 서브에이전트(타입, 작업 설명)와 완료된 에이전트 수. 서브에이전트의 모델을 확인할 수 있으면 — Agent 툴 호출의 `model` 파라미터, 또는 내장 `general-purpose`/`claude` 타입에 적용되는 `CLAUDE_CODE_SUBAGENT_MODEL` (`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`이면 `fork`/`Explore`를 제외한 모든 타입) — `Explore(Sonnet)`처럼 접미사로 표시합니다. 접미사가 없으면 메인 대화의 모델을 상속하거나 transcript만으로는 알 수 없는 경우입니다.
+- **출력 예시**: `🤖 Agent: Explore(Sonnet): Searching codebase +1`, `🤖 Agent: general-purpose(Opus): Research auth flow`, `Agent: 3 done`
+
+### todoProgress
+
+- **ID**: `todoProgress`
+- **데이터 소스**: transcript (JSONL)
+- **표시 내용**: TODO 목록의 완료율. 현재 진행 중인 항목이 있으면 함께 표시합니다.
+- **출력 예시**: `✓ 3/5`, `✓ 10/10 ✅`
+
+## Analytics
+
+### burnRate
+
+- **ID**: `burnRate`
+- **데이터 소스**: transcript (요청별 usage + 첫 엔트리 시각)
+- **표시 내용**: 분당 토큰 소비량 (세션 평균). 메인 대화의 모든 요청에서 input + cache write + output 토큰을 transcript로 합산해 transcript 첫 엔트리 이후 경과 시간으로 나눕니다(유휴 시간·resume 포함 — 위젯을 언제 켜도 같은 구간을 봅니다). cache read는 매 호출마다 프롬프트 전체를 다시 읽으므로 포함하면 소비가 아니라 컨텍스트 크기를 따라가게 되어 제외합니다. subagent 요청은 포함하지 않습니다. 세션 시작 시 `0/min`.
+- **출력 예시**: `🔥 5K/min`, `🔥 12K/min`
+
+### tokenSpeed
+
+- **ID**: `tokenSpeed`
+- **데이터 소스**: transcript (출력 토큰 + 턴 타이밍)
+- **표시 내용**: 세션 평균 출력 속도. 메인 대화의 출력 토큰을 각 요청의 실제 소요 시간 합으로 나눕니다(요청을 유발한 프롬프트/tool result부터 측정하므로 첫 토큰 대기 시간 포함). subagent 호출은 제외됩니다. 긴 세션에서는 천천히 움직이므로 최근 응답은 `tokenSpeedLast`를 사용하세요. 측정된 요청이 생기기 전까지 숨겨집니다.
+- **출력 예시**: `⚡ 67 tok/s`, `⚡ 120 tok/s`
+
+### tokenSpeedLast
+
+- **ID**: `tokenSpeedLast`
+- **데이터 소스**: transcript (출력 토큰 + 턴 타이밍)
+- **표시 내용**: 가장 최근 응답 하나의 출력 속도. 측정 방식은 `tokenSpeed`와 같고, 나란히 표시해도 구분되도록 라벨이 붙습니다. 도구 호출만 하는 짧은 응답은 첫 토큰 대기 시간 비중이 커서 값이 낮게 나오며, 이는 해당 요청의 실제 처리량입니다. 출력과 측정 가능한 구간이 모두 생기기 전까지 숨겨집니다.
+- **출력 예시**: `⚡ 최근 150 tok/s`
+
+### cacheHit
+
+- **ID**: `cacheHit`
+- **데이터 소스**: stdin (cache_read_input_tokens, 전체 입력)
+- **표시 내용**: 마지막 API 요청에서 캐시로 제공된 입력 토큰의 비율. 높을수록 효율적입니다. 세션 전체 관점은 `promptCache`를 참고하세요.
+- **출력 예시**: `📦 85%`, `📦 42%`
+
+### promptCache
+
+- **ID**: `promptCache`
+- **프리셋 문자**: `c`
+- **데이터 소스**: stdin (`prompt_cache`, Claude Code 2.1.251 이상)
+- **표시 내용**: 메인 대화의 세션 전체 프롬프트 캐시 상태 — `/cost`의 `Prompt cache (main)` 줄과 같은 수치입니다. ♨️는 캐시된 prefix가 아직 TTL 안에 있음(warm), ❄️는 만료되어 다음 요청이 대화를 다시 캐시함(cold)을 뜻합니다. warm일 때는 캐시가 만료되기까지 남은 시간(`expires_at` 기준, 마지막 1분은 초 단위)도 표시합니다. 퍼센트는 `hit_ratio`(세션 전체 입력 토큰 중 캐시 read 비율), `miss N`은 캐시 미스로 집계된 요청 수입니다. `expires_at`에 도달하면 Claude Code가 status line을 스스로 다시 그리므로 ❄️ 전환은 자동입니다. 그 사이의 분 단위 카운트다운은 다시 그려질 때만 줄어드는데 세션이 쉬는 동안에는 다시 그려지지 않으므로, `statusLine` 설정에 `"refreshInterval": 60`을 추가하면 계속 갱신됩니다. 첫 API 응답 전이거나 프로바이더/게이트웨이가 캐시 토큰을 보고하지 않으면(`caching_observed: false`) 숨겨집니다. 서브에이전트 요청은 집계에 포함되지 않습니다.
+- **출력 예시**: `♨️ 4분 91% miss 2`, `♨️ 40초 91%`, `❄️ 42% miss 7`
+
+### promptCacheState / promptCacheHit / promptCacheMisses
+
+`promptCache`의 구성 요소 중 하나만 표시하는 서브 위젯으로, 같은 데이터 소스를 공유합니다. 표시할 값이 없으면(히트율 미확정, 미스 0회) 빈 문자열이 되어 줄에서 빠집니다.
+
+| 위젯 ID | 프리셋 문자 | 표시 내용 |
+|---------|-------------|-----------|
+| `promptCacheState` | `w` | warm/cold 아이콘 + 남은 시간 (예: `♨️ 4분`, `❄️`) |
+| `promptCacheHit` | `h` | 세션 히트율만 (예: `91%`) |
+| `promptCacheMisses` | `x` | 미스 횟수만 (예: `miss 2`) |
+
+### depletionTime
+
+- **ID**: `depletionTime`
+- **데이터 소스**: API (속도 제한) + session (경과 시간)
+- **표시 내용**: 현재 소비 속도를 기준으로 속도 제한에 도달할 때까지 남은 예상 시간. 어떤 제한(5시간/7일)에 먼저 도달하는지도 표시합니다.
+- **출력 예시**: `⏳ 2h (5h)`, `⏳ 45m (7d)`
+
+## Multi-CLI
+
+### codexUsage
+
+- **ID**: `codexUsage`
+- **데이터 소스**: Codex API (ChatGPT 백엔드)
+- **표시 내용**: OpenAI Codex CLI의 모델명과 사용률. 각 제한 윈도우는 실제 기간으로 표시되며 플랜에 따라 다릅니다 (Plus는 5시간/7일, Pro는 7일 하나). `~/.codex/auth.json`이 없으면 자동 숨김됩니다.
+- **출력 예시**: `🔷 codex o4-mini 5h:30% 7d:15%`
+
+### geminiUsage
+
+- **ID**: `geminiUsage`
+- **데이터 소스**: Gemini API (Google Code Assist)
+- **표시 내용**: Google Gemini CLI의 현재 모델 사용률. `~/.gemini/oauth_creds.json`이 없거나 계정이 종료된 개인 티어이면 자동 숨김됩니다(Gemini CLI 개인 티어는 2026-06-18 종료, enterprise는 계속 지원). `detailed` 프리셋에는 없으며 `G`나 위젯 배열로 추가합니다.
+- **출력 예시**: `💎 gemini 2.5-pro 45%`
+
+### geminiUsageAll
+
+- **ID**: `geminiUsageAll`
+- **데이터 소스**: Gemini API (Google Code Assist)
+- **표시 내용**: Google Gemini CLI의 모든 모델 버킷 사용률. `~/.gemini/oauth_creds.json`이 없으면 자동 숨김됩니다.
+- **출력 예시**: `💎 2.5-pro:45% 2.5-flash:20%`
+
+### antigravityUsage
+
+- **ID**: `antigravityUsage`
+- **데이터 소스**: Antigravity API (Google Code Assist)
+- **표시 내용**: Google Antigravity CLI — 모델 패밀리별 주간 quota 그룹 (Gemini / Claude+GPT). `~/.gemini/antigravity-cli/antigravity-oauth-token` 파일이 없으면 자동 숨김됩니다.
+- **출력 예시**: `🪐️ Gemini 27% (6d22h) │ Claude+GPT 39% (6d19h)`
+
+### antigravityUsageAll
+
+- **ID**: `antigravityUsageAll`
+- **데이터 소스**: Antigravity API (Google Code Assist)
+- **표시 내용**: Google Antigravity CLI — 모델별 quota 상세 (모델 표시 이름 사용). `~/.gemini/antigravity-cli/antigravity-oauth-token` 파일이 없으면 자동 숨김됩니다.
+- **출력 예시**: `🪐️ Gemini 3.6 Flash: 27% │ Claude Opus: 39%`
+
+### zaiUsage
+
+- **ID**: `zaiUsage`
+- **데이터 소스**: z.ai API
+- **표시 내용**: z.ai/ZHIPU GLM의 5시간 토큰 사용률과 월간 MCP 사용률. `ANTHROPIC_BASE_URL`을 통해 z.ai가 감지되지 않으면 자동 숨김됩니다.
+- **출력 예시**: `🟢 GLM 5h:25% 1m:10%`
+
+## Insights
+
+### tokenBreakdown
+
+- **ID**: `tokenBreakdown`
+- **데이터 소스**: stdin (current_usage)
+- **표시 내용**: 입력/출력/캐시 쓰기/캐시 읽기 토큰의 세부 분석.
+- **출력 예시**: `📊 In 30K · Out 8K · CW 5K · CR 25K`
+
+### performance
+
+- **ID**: `performance`
+- **데이터 소스**: stdin (토큰) + session (경과 시간)
+- **표시 내용**: 캐시 히트율과 출력 비율을 조합한 복합 효율성 점수 (0-100).
+- **출력 예시**: `🟢 72%`, `🟡 55%`, `🔴 30%`
+
+### forecast
+
+- **ID**: `forecast`
+- **데이터 소스**: stdin (비용) + session (경과 시간)
+- **표시 내용**: 세션의 현재 소비 속도를 기반으로 추정한 시간당 비용.
+- **출력 예시**: `📈 ~$8/h`, `📈 ~$2/h`
+
+### budget
+
+- **ID**: `budget`
+- **데이터 소스**: stdin (비용) + 파일 (예산 설정)
+- **표시 내용**: 오늘의 누적 지출과 설정된 일일 예산 한도. 설정 파일에 `"dailyBudget"` 값이 필요합니다.
+  - 80% 소진 시 경고 표시
+  - 95% 소진 시 위험 표시
+- **출력 예시**: `💵 $5/$15`, `💵 $14/$15 ⚠️`, `💵 $15/$15 🚨`
+
+### todayCost
+
+- **ID**: `todayCost`
+- **데이터 소스**: stdin (비용) + 파일 (일일 비용 기록)
+- **표시 내용**: 오늘 전체 세션의 누적 비용을 표시합니다.
+- **출력 예시**: `💰 오늘: $4.83`, `💰 오늘: $12.50`
+
+## Info
+
+### version
+
+- **ID**: `version`
+- **데이터 소스**: stdin (version)
+- **표시 내용**: Claude Code 버전. stdin에 버전 정보가 없으면 위젯이 숨겨집니다.
+- **출력 예시**: `v1.0.80`
+
+### linesChanged
+
+- **ID**: `linesChanged`
+- **데이터 소스**: git (`git diff HEAD --shortstat` + `git ls-files --others`)
+- **표시 내용**: 커밋되지 않은 추가/삭제된 줄 수 (untracked 신규 파일 포함). 커밋하면 자연스럽게 리셋. 변경이 없으면 위젯이 숨겨집니다.
+- **출력 예시**: `+156 -23`, `+42`, `-15`
+
+### outputStyle
+
+- **ID**: `outputStyle`
+- **데이터 소스**: stdin (output_style)
+- **표시 내용**: 현재 출력 스타일 이름. "default"이거나 설정되지 않은 경우 위젯이 숨겨집니다.
+- **출력 예시**: `concise`, `verbose`
+
+### vimMode
+
+- **ID**: `vimMode`
+- **데이터 소스**: stdin (vim.mode)
+- **표시 내용**: 현재 vim 모드 (NORMAL 또는 INSERT). vim 모드가 비활성화되면 숨겨집니다.
+- **프리셋 문자**: `m`
+- **출력 예시**: `NORMAL`, `INSERT`
+
+### apiDuration
+
+- **ID**: `apiDuration`
+- **데이터 소스**: stdin (cost.total_duration_ms, cost.total_api_duration_ms)
+- **표시 내용**: 세션 시간 중 API 응답 대기에 사용된 비율. 세션이 API 바운드인지 도구 실행 바운드인지 파악에 유용합니다.
+- **프리셋 문자**: `a`
+- **출력 예시**: `API 45%`, `API 72%`
+
+## Status
+
+### peakHours
+
+- **ID**: `peakHours`
+- **데이터 소스**: 시스템 시계 (Pacific Time, `Intl.DateTimeFormat` 사용)
+- **표시 내용**: 현재 시각이 Anthropic API 피크 시간(평일 5:00-10:59 AM PT) 내인지 표시합니다. 다음 전환까지 카운트다운을 함께 보여줍니다. [PeakClaude](https://github.com/pforret/PeakClaude) 기반.
+- **프리셋 문자**: `p`
+- **출력 예시**: `피크 (3h17m)`, `비피크 (23h9m)`, `비피크 (2d17h)`
+
+### tagStatus
+
+- **ID**: `tagStatus`
+- **데이터 소스**: git (`describe` + `rev-list --count`)
+- **표시 내용**: 매칭된 각 git 태그로부터 HEAD까지의 커밋 수를 표시합니다. `"tagPatterns"` 설정으로 패턴 배열을 지정할 수 있으며 기본값은 `["v*"]`. 어떤 패턴도 매칭되지 않으면 위젯이 숨겨집니다.
+- **프리셋 문자**: `t`
+- **출력 예시**: `v1.2.3 +5`, `v1.2.3 +5, beta-3 +2`
+
+### slashCommand
+
+- **ID**: `slashCommand`
+- **데이터 소스**: 트랜스크립트 (사용자 텍스트의 `<command-name>` 태그)
+- **표시 내용**: 현재 턴을 시작한 슬래시 명령을 표시합니다 (예: `/superpowers:brainstorming`). 사용자가 일반 텍스트 메시지를 보내면 자동 해제됩니다. Claude의 도구 루프 동안에는 `tool_result`만 있는 user 엔트리는 무시되어 명령이 유지됩니다.
+- **프리셋 문자**: `/`
+- **출력 예시**: `🎯 /superpowers:brainstorming`, `🎯 /claude-dashboard:setup`
+
+### agentMode
+
+- **ID**: `agentMode`
+- **데이터 소스**: stdin (`agent.name`, `agent_type`)
+- **표시 내용**: 이 세션의 에이전트 정체성을 표시합니다 — `/agent <name>`으로 활성화된 커스텀 에이전트 (👤), 그리고/또는 이 세션이 서브에이전트로 디스패치된 경우 그 타입 (🤖). 이 세션이 *spawn한* 서브에이전트를 추적하는 `agentStatus`와 보는 방향이 반대입니다. 두 필드 모두 없으면 위젯이 숨겨집니다.
+- **프리셋 문자**: `g`
+- **출력 예시**: `👤 my-coder`, `🤖 code-explorer`, `👤 my-coder · 🤖 code-explorer`

@@ -1,0 +1,420 @@
+# Claude Code Configuration
+
+## Project Overview
+
+**claude-dashboard** is a Claude Code plugin that provides a comprehensive status line with modular widget system, multi-line display, context usage, API rate limits, and cost tracking.
+
+## Tech Stack
+
+- **Runtime**: Node.js 18+
+- **Language**: TypeScript 5.0+
+- **Build**: esbuild
+- **Target**: Claude Code Plugin
+
+## Project Structure
+
+```
+claude-dashboard/
+├── .claude-plugin/
+│   ├── plugin.json          # Plugin manifest
+│   └── marketplace.json     # Marketplace metadata
+├── commands/
+│   ├── setup.md             # /claude-dashboard:setup command
+│   └── check-usage.md       # /claude-dashboard:check-usage command
+├── hooks/
+│   ├── hooks.json           # SessionStart hook registration
+│   └── ensure-statusline.mjs # Shim sync + settings migration
+├── scripts/
+│   ├── statusline-shim.mjs  # Version-agnostic entry point (copied to PLUGIN_DATA)
+│   ├── statusline.ts        # Main entry point (status line)
+│   ├── check-usage.ts       # CLI usage dashboard entry point
+│   ├── mod/
+│   │   ├── register.tsx     # Mod entry: /claude-dashboard-pane pane + /claude-dashboard-band band
+│   │   ├── stdin-builder.ts # Builds renderer stdin from mod API state
+│   │   ├── ansi.ts          # ANSI parser for mod rendering
+│   │   ├── node-path.ts     # Locate node when the host PATH lacks it (nvm/fnm/volta)
+│   │   └── toggle.ts        # on/off/toggle + pane view argument rules
+│   ├── views/               # Pane session views (/claude-dashboard-pane <view>)
+│   │   ├── index.ts         # View registry
+│   │   ├── overview.ts      # dashboard tab overview (sections; used when modPane is unset)
+│   │   ├── shared.ts        # Shared view helpers
+│   │   ├── turns.ts         # turns view (per-prompt tokens/tools)
+│   │   ├── agents.ts        # agents view (subagent status)
+│   │   ├── files.ts         # files view (edited files)
+│   │   ├── todos.ts         # todos view
+│   │   ├── errors.ts        # errors view (failed tool calls)
+│   │   └── background.ts    # bg view (background jobs)
+│   ├── types.ts             # TypeScript interfaces
+│   ├── widgets/             # Widget system
+│   │   ├── base.ts          # Widget interface
+│   │   ├── index.ts         # Widget registry & orchestrator
+│   │   ├── model.ts         # Model widget
+│   │   ├── context.ts       # Context usage widget
+│   │   ├── cost.ts          # Cost widget
+│   │   ├── rate-limit.ts    # Rate limit widgets (5h, 7d)
+│   │   ├── project-info.ts  # Project info widget
+│   │   ├── config-counts.ts # Config counts widget
+│   │   ├── session-duration.ts # Session duration widget
+│   │   ├── tool-activity.ts # Tool activity widget
+│   │   ├── agent-status.ts  # Agent status widget
+│   │   ├── todo-progress.ts # Todo progress widget
+│   │   ├── burn-rate.ts     # Burn rate widget
+│   │   ├── cache-hit.ts     # Cache hit rate widget
+│   │   ├── prompt-cache.ts  # Prompt cache health widget + state/hit/misses sub-widgets (stdin.prompt_cache)
+│   │   ├── depletion-time.ts # Depletion time widget
+│   │   ├── codex-usage.ts   # Codex CLI usage widget
+│   │   ├── gemini-usage.ts  # Gemini CLI usage widget
+│   │   ├── antigravity-usage.ts # Antigravity CLI usage widget
+│   │   ├── zai-usage.ts     # z.ai/ZHIPU usage widget
+│   │   ├── usage-format.ts  # Shared percent + reset countdown formatter
+│   │   ├── token-breakdown.ts # Token breakdown widget
+│   │   ├── performance.ts   # Performance badge widget
+│   │   ├── forecast.ts      # Cost forecast widget
+│   │   ├── budget.ts        # Budget tracking widget
+│   │   ├── token-speed.ts   # Token speed widgets (session + last response)
+│   │   ├── session-name.ts  # Session name widget
+│   │   ├── today-cost.ts    # Today cost widget
+│   │   ├── last-prompt.ts   # Last prompt widget
+│   │   └── peak-hours.ts   # Peak hours widget
+│   └── utils/
+│       ├── api-client.ts    # OAuth API client with caching
+│       ├── codex-client.ts  # Codex CLI API client
+│       ├── gemini-client.ts # Gemini CLI API client
+│       ├── antigravity-client.ts # Antigravity CLI API client
+│       ├── zai-api-client.ts # z.ai/ZHIPU API client
+│       ├── provider.ts      # Provider detection (anthropic/zai/zhipu)
+│       ├── colors.ts        # ANSI color codes + theme system
+│       ├── credentials.ts   # Keychain/credentials extraction (60s backoff on failure)
+│       ├── debug.ts         # Debug utilities
+│       ├── formatters.ts    # Token/cost/time/duration formatting
+│       ├── hash.ts          # Token hashing for cache keys
+│       ├── i18n.ts          # Internationalization
+│       ├── progress-bar.ts  # Progress bar rendering
+│       ├── session.ts       # Session duration tracking
+│       ├── budget.ts        # Budget tracking utilities
+│       ├── subagents.ts     # Subagent transcript scan (agent-*.jsonl + .meta.json)
+│       ├── band-marker.ts   # Per-session band heartbeat marker (band-<sessionId>)
+│       ├── render-mode.ts   # Mod pane/band render mode detection
+│       └── transcript-parser.ts # Transcript JSONL parsing
+├── types/
+│   └── mod-state.d.ts       # Mod state type declarations
+├── locales/
+│   ├── en.json              # English translations
+│   └── ko.json              # Korean translations
+├── dist/
+│   ├── index.js             # Status line built output (committed)
+│   ├── check-usage.js       # CLI usage dashboard built output (committed)
+│   └── mod.js               # Mod (/claude-dashboard-pane, /claude-dashboard-band) built output (committed)
+└── package.json
+```
+
+## Engineering Handbook
+
+구현 패턴, 아키텍처 결정, 코딩 컨벤션은 [`docs/ENGINEERING_HANDBOOK.md`](docs/ENGINEERING_HANDBOOK.md) 참조.
+
+**양방향 링크 시스템:**
+- 코드의 `@handbook 3.1` → ENGINEERING_HANDBOOK 섹션 참조
+- 문서의 `<!-- @code -->` 마커 → 소스 파일 참조
+- 변경 시 양쪽 동기화 필요
+- 마커 검색: `grep -r "@handbook" scripts/`
+
+| 찾는 것 | HANDBOOK 섹션 |
+|---------|--------------|
+| 코딩 컨벤션 | 2 |
+| 위젯 아키텍처 | 3 |
+| 캐싱 아키텍처 | 4 |
+| 테마 & i18n | 5 |
+| 에러 핸들링 | 6 |
+| API 클라이언트 | 7 |
+| 테스트 | 8 |
+| Claude Code mod (pane/band) | 9 |
+
+| 패턴 | 참고 파일 |
+|------|----------|
+| 위젯 구현 (기본) | `scripts/widgets/cost.ts` |
+| 위젯 구현 (API) | `scripts/widgets/rate-limit.ts` |
+| 위젯 구현 (transcript) | `scripts/widgets/tool-activity.ts` |
+| 위젯 구현 (파생/공유 getData) | `scripts/widgets/context.ts`, `scripts/widgets/session-id.ts` |
+| 위젯 구현 (git + 모듈 캐시) | `scripts/widgets/tag-status.ts` |
+| 버전 무관 statusLine 진입점 | `scripts/statusline-shim.mjs`, `hooks/ensure-statusline.mjs` |
+| API 클라이언트 | `scripts/utils/api-client.ts` |
+| Cross-process file cache | `scripts/utils/file-cache.ts` |
+| 포매팅 유틸리티 | `scripts/utils/formatters.ts` |
+| 외부 CLI 사용량 표시 (퍼센트 + 리셋) | `scripts/widgets/usage-format.ts` |
+| 응답 필드로 윈도우 라벨 결정 (위치 아님) | `scripts/utils/formatters.ts` (`formatWindowLabel`) |
+| 이모지 아이콘 (단일 출처) | `scripts/utils/emoji.ts` |
+| Registry invariant 테스트 | `scripts/__tests__/emoji.test.ts` |
+| mod (renderer 하위 프로세스 + ANSI 변환) | `scripts/mod/register.tsx`, `scripts/mod/ansi.ts` |
+| 세션 마커 (TTL heartbeat) | `scripts/utils/band-marker.ts` |
+| pane session view (transcript-derived) | `scripts/views/turns.ts` |
+| layout over widget data (pane overview) | `scripts/views/overview.ts` |
+| subagent transcript scan | `scripts/utils/subagents.ts` |
+
+## Widget Architecture
+
+### Widget Interface
+
+Each widget implements the `Widget` interface:
+
+```typescript
+interface Widget<T extends WidgetData> {
+  id: WidgetId;
+  name: string;
+  getData(ctx: WidgetContext): Promise<T | null>;
+  render(data: T, ctx: WidgetContext): string;
+}
+```
+
+### Available Widgets
+
+| Widget ID | Data Source | Description |
+|-----------|-------------|-------------|
+| `model` | stdin + settings | Model name and version with emoji (e.g. `Opus 5.5`, parsed from `display_name`), effort level for Opus/Sonnet/Fable (MAX/X/H/M/L), fast mode for Opus (↯). Live `stdin.effort.level` / `stdin.fast_mode` win; `settings.json` (`modelSettings[<id>].effortLevel`, `effortLevel`, `fastMode`) is the fallback for older Claude Code |
+| `context` | stdin | Progress bar, %, tokens |
+| `contextBar` | stdin | Progress bar only (sub-widget of `context`) |
+| `contextPercentage` | stdin | Percentage only (sub-widget of `context`) |
+| `contextUsage` | stdin | Token count only, e.g. `42K/200K` (sub-widget of `context`) |
+| `cost` | stdin | Session cost |
+| `rateLimit5h` | API | 5-hour rate limit. Hidden when the response has a 7-day window but no 5-hour one (verified Ultra accounts); `⚠️` only when neither exists |
+| `rateLimit7d` | API | 7-day rate limit (Pro/Max/Ultra) |
+| `rateLimit7dSonnet` | API | 7-day Sonnet limit (Max). Deprecated ~2026-06: merged into the unified weekly bucket at Sonnet 5 launch; API returns null so the widget stays hidden until the field returns |
+| `rateLimit7dFable` | API | 7-day Fable limit (Max/Ultra) |
+| `projectInfo` | stdin + git | Directory + branch + ahead/behind (↑↓), subpath when CWD differs from project_dir, worktree indicator |
+| `configCounts` | filesystem + stdin | CLAUDE.md, AGENTS.md, rules, MCPs, hooks, +Dirs |
+| `sessionDuration` | file | Session duration |
+| `toolActivity` | transcript | Tool tracking with target display (e.g., `Read(app.ts)`, `Bash(npm test)`) |
+| `agentStatus` | transcript + env | Agent tracking (`Agent`/legacy `Task` tool). Shows the subagent's model when resolvable: per-invocation `model` param, or `CLAUDE_CODE_SUBAGENT_MODEL` for built-in `general-purpose`/`claude` (FORCE pins all but `fork`/`Explore`). Hidden suffix when it inherits |
+| `todoProgress` | transcript | Todo completion |
+| `burnRate` | transcript | Session-average tokens per minute: input + cache write + output summed from the transcript (cache reads excluded) over the time since the transcript's first entry |
+| `cacheHit` | stdin | Cache hit rate percentage (last request, from `context_window.current_usage`) |
+| `promptCache` | stdin | Session-wide prompt cache health from `prompt_cache` (≥ 2.1.251): ♨️ warm + time left until cold (from `expires_at`) / ❄️ cold, `hit_ratio` %, `miss N` (localized). Hidden until first API response or when `caching_observed` is false. Claude Code re-renders on its own at `expires_at`, so the warm→cold flip is automatic; the minute countdown in between only ticks with `statusLine.refreshInterval` |
+| `promptCacheState` | stdin | Warm/cold icon + time left only (sub-widget of `promptCache`) |
+| `promptCacheHit` | stdin | Session `hit_ratio` % only (sub-widget of `promptCache`) |
+| `promptCacheMisses` | stdin | `miss N` only, empty at 0 (sub-widget of `promptCache`) |
+| `depletionTime` | API + session | Estimated time to rate limit |
+| `codexUsage` | Codex API | OpenAI Codex CLI usage (model + rate-limit windows). Windows are labeled from `limit_window_seconds`, not response position — Plus returns 5h + 7d, Pro a single 7d |
+| `geminiUsage` | Gemini API | Google Gemini CLI usage (current model only). Personal tiers retired 2026-06-18 → see `antigravityUsage`; enterprise still supported. Auto-hides without `~/.gemini/oauth_creds.json`, and when the account tier is retired (loadCodeAssist `UNSUPPORTED_CLIENT`; verdict cached a day). Not in the `detailed` preset; opt in with `G` |
+| `geminiUsageAll` | Gemini API | Google Gemini CLI usage (all model buckets) |
+| `antigravityUsage` | Antigravity API | Google Antigravity CLI weekly quota by model family (Gemini / Claude+GPT). Auto-hides without `~/.gemini/antigravity-cli/antigravity-oauth-token` |
+| `antigravityUsageAll` | Antigravity API | Google Antigravity CLI per-model quota buckets |
+| `zaiUsage` | z.ai API | z.ai/ZHIPU GLM usage (5h tokens, 1m MCP) |
+| `tokenBreakdown` | stdin | Input/output/cache write/read token breakdown |
+| `performance` | stdin + session | Composite efficiency badge (cache hit + output ratio) |
+| `forecast` | stdin + session | Estimated hourly cost based on session rate |
+| `budget` | stdin + file | Daily spending vs configured budget limit |
+| `linesChanged` | git | Lines added/removed count (including untracked files) |
+| `outputStyle` | stdin | Current output style |
+| `version` | stdin | Claude Code version display |
+| `tokenSpeed` | transcript | Session-average output speed (tok/s): main-thread output tokens ÷ summed request wall-clock spans. Not stdin — `total_output_tokens` is per-response since 2.1.132 and `total_api_duration_ms` includes subagent calls |
+| `tokenSpeedLast` | transcript | Output speed of the most recent response only, labelled `last` |
+| `sessionName` | transcript | Session name from /rename command |
+| `todayCost` | stdin + file | Total spending across all sessions today |
+| `lastPrompt` | transcript | Last user prompt with timestamp |
+| `vimMode` | stdin | Vim mode (NORMAL/INSERT), hidden when vim disabled |
+| `apiDuration` | stdin | API time as % of session time |
+| `peakHours` | system clock | Peak hours indicator with countdown (weekdays 5-11 AM PT) |
+| `tagStatus` | git | Distance (commits ahead) from matched git tags. Supports multiple glob patterns via `tagPatterns` config (default `["v*"]`). Hidden when no pattern matches. |
+| `slashCommand` | transcript | Active slash command for the current turn (e.g. `🎯 /superpowers:brainstorming`). Cleared by next plain-text user message. |
+| `agentMode` | stdin | Session agent identity: `👤` for custom agent (`stdin.agent.name`), `🤖` for subagent type (`stdin.agent_type`). Distinct from `agentStatus` which tracks spawned subagents. |
+
+### Display Modes
+
+```typescript
+type DisplayMode = 'compact' | 'normal' | 'detailed' | 'custom';
+
+// Additive approach: each mode adds lines, widgets stay in same position
+const DISPLAY_PRESETS = {
+  compact: [
+    ['model', 'context', 'cost', 'rateLimit5h', 'rateLimit7d', 'rateLimit7dSonnet', 'rateLimit7dFable', 'zaiUsage'],
+  ],
+  normal: [
+    ['model', 'context', 'cost', 'rateLimit5h', 'rateLimit7d', 'rateLimit7dSonnet', 'rateLimit7dFable', 'zaiUsage'],
+    ['projectInfo', 'sessionId', 'sessionDuration', 'burnRate', 'todoProgress'],
+  ],
+  detailed: [
+    ['model', 'context', 'cost', 'rateLimit5h', 'rateLimit7d', 'rateLimit7dSonnet', 'rateLimit7dFable', 'zaiUsage'],
+    ['projectInfo', 'sessionName', 'sessionId', 'sessionDuration', 'burnRate', 'tokenSpeed', 'depletionTime', 'todoProgress'],
+    ['configCounts', 'toolActivity', 'agentStatus', 'cacheHit', 'promptCache', 'performance'],
+    ['tokenBreakdown', 'forecast', 'budget', 'todayCost'],
+    ['codexUsage', 'antigravityUsage', 'linesChanged', 'outputStyle', 'version', 'peakHours'],
+    ['lastPrompt', 'vimMode', 'apiDuration', 'tagStatus'],
+  ],
+};
+```
+
+### Preset Shortcuts
+
+Quick widget layout via single-character shorthand. Set `"preset"` in config, use `|` to separate lines.
+
+```json
+{ "preset": "MC$R|BDO" }
+```
+
+| Char | Widget | Char | Widget |
+|------|--------|------|--------|
+| `M` | model | `T` | toolActivity |
+| `C` | context | `A` | agentStatus |
+| `$` | cost | `O` | todoProgress |
+| `R` | rateLimit5h | `B` | burnRate |
+| `7` | rateLimit7d | `E` | depletionTime |
+| `S` | rateLimit7dSonnet | `H` | cacheHit |
+| `P` | projectInfo | `X` | codexUsage |
+| `I` | sessionId | `G` | geminiUsage |
+| `D` | sessionDuration | `Z` | zaiUsage |
+| `K` | configCounts | `N` | tokenBreakdown |
+| `F` | performance | `W` | forecast |
+| `U` | budget | `L` | linesChanged |
+| `V` | version | `Y` | outputStyle |
+| `Q` | tokenSpeed | `J` | sessionName |
+| `@` | todayCost | `?` | lastPrompt |
+| `m` | vimMode | `a` | apiDuration |
+| `p` | peakHours | `t` | tagStatus |
+| `b` | contextBar | `%` | contextPercentage |
+| `#` | contextUsage | `/` | slashCommand |
+| `g` | agentMode | `f` | rateLimit7dFable |
+| `^` | antigravityUsage | `c` | promptCache |
+| `w` | promptCacheState | `h` | promptCacheHit |
+| `x` | promptCacheMisses | `q` | tokenSpeedLast |
+
+### Theme System
+
+Color themes via `getTheme()` semantic roles. Set `"theme"` in config.
+
+| Theme | Style |
+|-------|-------|
+| `default` | Pastel colors (cyan, yellow, pink, green) |
+| `minimal` | Monochrome (white + gray) |
+| `catppuccin` | Catppuccin Mocha palette |
+| `catppuccinLatte` | Catppuccin Latte palette (light-mode terminals) |
+| `dracula` | Dracula palette |
+| `gruvbox` | Gruvbox palette |
+| `nord` | Nord polar night/frost palette |
+| `tokyoNight` | Tokyo Night blue/purple palette |
+| `solarized` | Solarized dark palette |
+
+### Separator Styles
+
+Widget separator style via `"separator"` in config.
+
+| Style | Character | Example |
+|-------|-----------|---------|
+| `pipe` (default) | `│` | `Model │ Context │ Cost` |
+| `space` | ` ` | `Model  Context  Cost` |
+| `dot` | `·` | `Model · Context · Cost` |
+| `arrow` | `›` | `Model › Context › Cost` |
+
+### Widget Toggle
+
+`"disabledWidgets"` in config filters widgets from any display mode (preset or custom).
+Empty lines after filtering are automatically removed.
+
+## Development Workflow
+
+```bash
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Test locally
+echo '{"model":{"display_name":"Opus"},"workspace":{"current_dir":"/tmp"},...}' | node dist/index.js
+```
+
+## Code Style
+
+- Use TypeScript strict mode
+- ESM modules (import/export)
+- Functional style preferred
+- No external runtime dependencies (Node.js built-ins only)
+
+## Key Conventions
+
+1. **dist/index.js is committed** - Plugin users don't need to build
+2. **API cache (default 300s, `cache.ttlSeconds`)** - Avoid rate limiting; shared across processes via the file cache
+3. **Graceful degradation** - Show ⚠️ on API errors, widgets return null on failure
+4. **i18n** - All user-facing strings in locales/*.json
+5. **Widget isolation** - Each widget handles its own data fetching and rendering
+
+## Testing Checklist
+
+Before committing:
+- [ ] `npm run build` succeeds
+- [ ] All display modes (compact/normal/detailed) work
+- [ ] Pro/Max/Ultra plan output format correct
+- [ ] Korean/English switching works
+- [ ] API error shows ⚠️ instead of crash
+- [ ] Missing data gracefully hides widgets
+- [ ] Theme switching works (default/minimal/catppuccin/dracula/gruvbox)
+- [ ] `disabledWidgets` correctly filters widgets
+
+## Common Tasks
+
+### Adding a new widget
+
+1. Create `scripts/widgets/{widget-name}.ts`
+2. Implement `Widget` interface with `getData()` and `render()`
+3. Add widget ID to `WidgetId` type in `types.ts` (+ data type to the `WidgetData` union)
+4. Register widget in `scripts/widgets/index.ts`
+5. Add icon to `scripts/utils/emoji.ts` (value must end with U+FE0F) and a `PRESET_CHAR_MAP` char if needed
+6. Add translations to `locales/*.json` if needed
+7. Update `DISPLAY_PRESETS` if adding to default modes
+8. API-backed widget with its own file cache? Add the prefix to `CLEANABLE_PREFIXES` in `scripts/utils/file-cache.ts`
+9. Update docs: `README.md`, this file's tables, `commands/setup.md`, `website/src/content/docs/` (EN + KO)
+10. Rebuild and test
+
+### Adding a new locale
+
+1. Create `locales/{lang}.json` copying from `en.json`
+2. Update `scripts/utils/i18n.ts` to import new locale
+3. Test with `/claude-dashboard:setup normal {lang}`
+
+### Modifying display modes
+
+1. Edit `DISPLAY_PRESETS` in `scripts/types.ts`
+2. Update `README.md` and `commands/setup.md` examples
+3. Rebuild and test
+
+### Updating API client
+
+1. Edit `scripts/utils/api-client.ts`
+2. Check cache invalidation logic
+3. Test with expired cache (`rm -rf ~/.cache/claude-dashboard/`)
+
+### Changing the mod
+
+1. Edit `scripts/mod/register.tsx` (config keys `modPane` / `modBand` / `modBandDefault` live in `scripts/types.ts`)
+2. `npm run build && claude plugin validate .` (validate also reports a pre-existing reserved-name error for "claude-dashboard"; ignore it)
+3. Real-render check: `claude --plugin-dir .`, then `/claude-dashboard-pane` and `/claude-dashboard-band on` (both take `on` / `off` / nothing to toggle); also try the pane views, e.g. `/claude-dashboard-pane turns` (`dashboard|turns|agents|files|todos|errors|bg`); in the pane, `ctrl+x tab` then a digit `1`-`7` (or Tab + Enter) switches tabs
+4. Constraints: helpers that take `$` must be top-level function declarations; atom plugin/key and ui matchers must be string literals; `export function register`; no minify
+
+## Cache Architecture
+
+### Multi-Account Support
+
+- Each OAuth token is hashed (SHA-256, 16 chars) for cache key separation
+- Cache files: `~/.cache/claude-dashboard/cache-{hash}.json`
+- Supports concurrent account switching without cache conflicts
+
+### Three-Tier Caching
+
+1. **Memory cache** - In-process Map, fastest
+2. **File cache** - Persists across process restarts
+3. **API fetch** - Falls back when cache misses
+
+### Transcript Caching (Incremental)
+
+- Transcript parser tracks byte offset, only reads new bytes since last parse
+- Full re-parse only on first load or file truncation
+- Shared across tool/agent/todo widgets
+
+### Cleanup Behavior
+
+- **Trigger**: Time-based (once per hour maximum)
+- **Target**: Files older than `CACHE_MAX_AGE_SECONDS` (1 hour)
+- **Pattern**: `cache-*.json` (Anthropic), `codex-usage-*.json`, `gemini-usage-*.json`, `antigravity-usage-*.json`, `antigravity-token-*.json`, `zai-usage-*.json`, `band-*` (mod band markers) in cache directory
+
+### Request Deduplication
+
+- `pendingRequests` Map prevents concurrent duplicate API calls
+- Same token hash → shares single in-flight request

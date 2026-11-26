@@ -1,0 +1,660 @@
+---
+title: Widget Reference
+description: Detailed data and behavior for each widget
+sidebar:
+  order: 2
+---
+
+This page provides detailed information about each widget, including its data source, what it displays, and example output.
+
+## Core Widgets
+
+### model
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `model` |
+| **Data Source** | stdin (model info, live `effort.level` / `fast_mode`) + settings.json fallback |
+| **Description** | Displays the current model name and version with emoji. The version is read from `display_name` (`Opus 5 (1M context)` → `Opus 5`); names without one show the family only. Shows effort level for Opus/Sonnet/Fable (MAX/X/H/M/L) and fast mode indicator for Opus (↯). The live `effort.level` / `fast_mode` fields Claude Code sends on stdin win, so mid-session `/effort` changes and session-only picks are reflected; older Claude Code versions without them fall back to `settings.json`. |
+
+**Example output:**
+```
+◆ Opus 5.5(X)
+◆ Sonnet 5(M)
+◆ Opus 5.5(X) ↯
+◆ Haiku 4.5
+```
+
+### context
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `context` |
+| **Data Source** | stdin (context_window) |
+| **Description** | Shows a progress bar, percentage, and token count for context window usage. Color changes by utilization: green 0-50%, yellow 51-80%, red 81-100%. |
+
+**Example output:**
+```
+-------- 45% 90K
+████---- 80% 160K
+```
+
+### contextBar / contextPercentage / contextUsage
+
+Sub-widgets of `context` that render just one of its three components. Use them when you need to keep the status line compact (e.g., on a split terminal) while still surfacing the most important context information. All sub-widgets share the same data source as `context`, so colors and percentages stay in sync.
+
+| Widget ID | Shows |
+|-----------|-------|
+| `contextBar` | Progress bar only |
+| `contextPercentage` | Percentage only (e.g. `45%`) |
+| `contextUsage` | Token count only (e.g. `90K/200K`) |
+
+**Example layout:**
+```jsonc
+// .claude/claude-dashboard.local.json
+"lines": [
+  ["projectInfo", "contextBar", "contextPercentage", "rateLimit5h"]
+]
+```
+
+### cost
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `cost` |
+| **Data Source** | stdin (cost) |
+| **Description** | Shows the total session cost in USD. |
+
+**Example output:**
+```
+$1.25
+$0.03
+```
+
+### projectInfo
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `projectInfo` |
+| **Data Source** | stdin (workspace) + git |
+| **Description** | Shows the current directory name, git branch (clickable OSC8 hyperlink to GitHub when remote is configured), and commits ahead/behind upstream. When CWD differs from the project root, shows the relative subpath. In worktree sessions, shows a worktree indicator. |
+
+**Example output:**
+```
+📁 my-project (main)
+📁 my-project (feature ↑3)
+📁 my-project (main ↑2↓1)
+📁 my-project (src/components) (main)
+📁 my-project (main) 🌳 wt:feature-branch
+```
+
+## Rate Limit Widgets
+
+### rateLimit5h
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `rateLimit5h` |
+| **Data Source** | API (oauth/usage) |
+| **Description** | Shows the 5-hour rate limit utilization percentage with reset countdown timer. Available on Pro and Max plans. Hidden on verified Ultra accounts, which have no 5-hour limit. |
+
+**Example output:**
+```
+5h: 42%
+5h: 85% (1h23m)
+```
+
+### rateLimit7d
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `rateLimit7d` |
+| **Data Source** | API (oauth/usage) |
+| **Description** | Shows the 7-day rate limit utilization. Available on Pro, Max and Ultra plans. |
+
+**Example output:**
+```
+7d: 69%
+```
+
+### rateLimit7dSonnet
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `rateLimit7dSonnet` |
+| **Data Source** | API (oauth/usage) |
+| **Description** | Shows the 7-day Sonnet-specific rate limit utilization. Max plan only. **Deprecated ~2026-06:** Anthropic merged the Sonnet weekly limit into the unified all-models weekly bucket at the Sonnet 5 launch, so the usage API returns `null` and this widget stays hidden until/unless the field returns. |
+
+**Example output:**
+```
+7d-S: 23%
+```
+
+### rateLimit7dFable
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `rateLimit7dFable` |
+| **Data Source** | API (oauth/usage) |
+| **Description** | Shows the 7-day Fable-specific weekly usage cap. Max and Ultra plans. Sourced from the API's generic `limits[]` array (a `weekly_scoped` entry) rather than a flat field, so the widget stays hidden unless the account has a Fable cap. |
+
+**Example output:**
+```
+7d-F: 18%
+```
+
+## Session Widgets
+
+### sessionId
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `sessionId` |
+| **Data Source** | stdin (session_id) |
+| **Description** | Shows a short 8-character session identifier. |
+
+**Example output:**
+```
+abc12345
+```
+
+### sessionIdFull
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `sessionIdFull` |
+| **Data Source** | stdin (session_id) |
+| **Description** | Shows the full UUID session identifier. |
+
+**Example output:**
+```
+abc12345-6789-0def-ghij-klmnopqrstuv
+```
+
+### sessionDuration
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `sessionDuration` |
+| **Data Source** | file (session tracking) |
+| **Description** | Shows how long the current session has been running. |
+
+**Example output:**
+```
+45m
+1h23m
+2h05m
+```
+
+### sessionName
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `sessionName` |
+| **Data Source** | transcript (JSONL) |
+| **Description** | Shows the session name set via the /rename command. Hidden when no name has been set. |
+
+**Example output:**
+```
+» feature-auth
+» bug-fix-123
+```
+
+### lastPrompt
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `lastPrompt` |
+| **Data Source** | transcript (JSONL) |
+| **Description** | Shows the most recent user prompt in the current session with a timestamp. Useful for quickly identifying the session context. Hidden when no user prompt has been sent yet. |
+
+**Example output:**
+```
+💬 14:32 Fix the authentication bug in middleware
+💬 09:15 Add unit tests for the API client
+```
+
+### configCounts
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `configCounts` |
+| **Data Source** | filesystem + stdin |
+| **Description** | Counts and displays the number of CLAUDE.md files, AGENTS.md files, rules, MCP servers, hooks, and added directories configured in the project. |
+
+**Example output:**
+```
+CLAUDE.md: 2 | AGENTS.md: 1 | rules: 3 | MCPs: 1 | hooks: 0 | +Dirs: 2
+```
+
+## Activity Widgets
+
+### toolActivity
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `toolActivity` |
+| **Data Source** | transcript (JSONL) |
+| **Description** | Shows the number of running and completed tool calls in the current session. When tools are running, displays the tool name with its target (e.g., file path or command). |
+
+**Example output:**
+```
+⚙️ 12 done
+⚙️ Read(app.ts) (8 done)
+⚙️ Read(app.ts), Bash(npm test) (12 done)
+```
+
+### agentStatus
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `agentStatus` |
+| **Data Source** | transcript (JSONL) + environment |
+| **Description** | Shows the running subagent (type, task description) and the number of completed subagents. When the subagent's model can be determined — from the Agent tool's per-invocation `model` parameter, or from `CLAUDE_CODE_SUBAGENT_MODEL` for the built-in `general-purpose`/`claude` types (with `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`, every type except `fork` and `Explore`) — it appears as a suffix, e.g. `Explore(Sonnet)`. No suffix means the subagent inherits the main conversation's model or the model isn't knowable from the transcript. |
+
+**Example output:**
+```
+🤖 Agent: Explore(Sonnet): Searching codebase +1
+🤖 Agent: general-purpose(Opus): Research auth flow
+Agent: 3 done
+```
+
+### todoProgress
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `todoProgress` |
+| **Data Source** | transcript (JSONL) |
+| **Description** | Shows the completion rate of todo items tracked in the session. |
+
+**Example output:**
+```
+3/5
+5/5
+```
+
+## Analytics Widgets
+
+### burnRate
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `burnRate` |
+| **Data Source** | transcript (per-request usage + first entry time) |
+| **Description** | Session-average token consumption per minute: input + cache write + output tokens of every main-conversation request, summed from the transcript, over the time since the transcript's first entry (idle time and resumed sessions included, so the figure stays consistent however late the widget is enabled). Cache reads are excluded — they re-read the whole prompt prefix on every call, so counting them tracks context size rather than spend. Subagent requests are not included. Shows `0/min` at session start. |
+
+**Example output:**
+```
+🔥 5K/min
+🔥 12K/min
+```
+
+### tokenSpeed
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `tokenSpeed` |
+| **Data Source** | transcript (output tokens + turn timing) |
+| **Description** | Session-average output speed: the main conversation's output tokens over the summed wall-clock span of its requests (each measured from the triggering prompt or tool result, so time-to-first-token is included). Subagent calls are excluded. Moves slowly in a long session — use `tokenSpeedLast` for the latest response. Hidden until a request has been measured. |
+
+**Example output:**
+```
+⚡ 67 tok/s
+⚡ 120 tok/s
+```
+
+### tokenSpeedLast
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `tokenSpeedLast` |
+| **Data Source** | transcript (output tokens + turn timing) |
+| **Description** | Output speed of the most recent response alone, measured the same way as `tokenSpeed`. Labelled so it can sit next to `tokenSpeed`. Short responses (e.g. a lone tool call) read low because time-to-first-token dominates their span — that is the real end-to-end rate of that request, not a parsing error. Hidden until a response has both output and a measurable span. |
+
+**Example output:**
+```
+⚡ last 150 tok/s
+```
+
+### cacheHit
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `cacheHit` |
+| **Data Source** | stdin (context_window.current_usage) |
+| **Description** | Shows the percentage of input tokens served from cache on the most recent API request. Higher values indicate better cache utilization. For the session-wide view, see `promptCache`. |
+
+**Example output:**
+```
+85%
+42%
+```
+
+### promptCache
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `promptCache` |
+| **Preset char** | `c` |
+| **Data Source** | stdin (`prompt_cache`, Claude Code ≥ 2.1.251) |
+| **Description** | Session-wide prompt cache health for the main conversation — the same numbers as the `Prompt cache (main)` line in `/cost`. ♨️ means the cached prefix is still within its TTL (warm), ❄️ means it has gone cold and the next request re-caches the conversation. While warm it also shows the time left before the cache goes cold (from `expires_at`; seconds in the last minute). The percentage is `hit_ratio` (cache reads over all input tokens this session), and `miss N` counts requests that missed the cache. Claude Code re-renders the status line by itself when `expires_at` is reached, so the switch to ❄️ is automatic. The minute countdown in between only moves on re-renders, which pause while the session is idle — add `"refreshInterval": 60` to your `statusLine` setting to keep it ticking. Hidden until the first API response and when the provider or gateway reports no cache tokens (`caching_observed: false`). Subagent requests are not counted. |
+
+**Example output:**
+```
+♨️ 4m 91% miss 2
+♨️ 40s 91%
+❄️ 42% miss 7
+```
+
+### promptCacheState / promptCacheHit / promptCacheMisses
+
+Sub-widgets of `promptCache` that render just one of its parts, sharing its data source. A sub-widget with nothing to show (no ratio yet, zero misses) renders empty and is dropped from the line.
+
+| Widget ID | Preset char | Shows |
+|-----------|-------------|-------|
+| `promptCacheState` | `w` | Warm/cold icon + time left (e.g. `♨️ 4m`, `❄️`) |
+| `promptCacheHit` | `h` | Session hit ratio only (e.g. `91%`) |
+| `promptCacheMisses` | `x` | Miss count only (e.g. `miss 2`) |
+
+### depletionTime
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `depletionTime` |
+| **Data Source** | API (rate limits) + session duration |
+| **Description** | Estimates the time remaining until a rate limit is reached, based on the current session consumption rate. The calculation assumes all current utilization came from this session, so accuracy improves as the session runs longer. |
+
+**Example output:**
+```
+~2h (5h)
+~45m (7d)
+```
+
+## Multi-CLI Widgets
+
+### codexUsage
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `codexUsage` |
+| **Data Source** | Codex API (ChatGPT backend) |
+| **Description** | Shows OpenAI Codex CLI usage including model name and rate limit percentages. Each window is labeled by its actual duration, which varies by plan — Plus returns 5h + 7d, Pro a single 7d. Auto-hides if `~/.codex/auth.json` is not found. |
+
+**Example output:**
+```
+codex o4-mini 5h:30% 7d:45%
+```
+
+### geminiUsage
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `geminiUsage` |
+| **Data Source** | Gemini API (Code Assist) |
+| **Description** | Shows Google Gemini CLI usage for the current model only. Auto-hides if `~/.gemini/oauth_creds.json` is not found, or when the account is on a retired personal tier (Gemini CLI personal tiers retired 2026-06-18; enterprise still supported). Not part of the `detailed` preset; add it with `G` or custom lines. |
+
+**Example output:**
+```
+gemini 2.5-pro 60%
+```
+
+### geminiUsageAll
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `geminiUsageAll` |
+| **Data Source** | Gemini API (Code Assist) |
+| **Description** | Shows Google Gemini CLI usage across all model buckets. Auto-hides if `~/.gemini/oauth_creds.json` is not found. |
+
+**Example output:**
+```
+gemini pro:60% flash:20%
+```
+
+### antigravityUsage
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `antigravityUsage` |
+| **Data Source** | Antigravity API (Code Assist) |
+| **Description** | Shows Google Antigravity CLI weekly quota grouped by model family, such as Gemini and Claude+GPT. Auto-hides if `~/.gemini/antigravity-cli/antigravity-oauth-token` is not found. |
+
+**Example output:**
+```
+🪐️ Gemini 27% (6d22h) │ Claude+GPT 39% (6d19h)
+```
+
+### antigravityUsageAll
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `antigravityUsageAll` |
+| **Data Source** | Antigravity API (Code Assist) |
+| **Description** | Shows Google Antigravity CLI weekly quota for every model bucket, using each model's display name. Auto-hides if `~/.gemini/antigravity-cli/antigravity-oauth-token` is not found. |
+
+**Example output:**
+```
+🪐️ Gemini 3.6 Flash: 27% │ Claude Opus: 39%
+```
+
+### zaiUsage
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `zaiUsage` |
+| **Data Source** | z.ai API |
+| **Description** | Shows z.ai/ZHIPU GLM usage including 5-hour token usage and monthly MCP usage. Auto-hides if not detected via `ANTHROPIC_BASE_URL`. |
+
+**Example output:**
+```
+GLM 5h:42% MCP:15%
+```
+
+## Insight Widgets
+
+### tokenBreakdown
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `tokenBreakdown` |
+| **Data Source** | stdin (context_window.current_usage) |
+| **Description** | Shows a breakdown of token usage by type: input tokens, output tokens, cache write tokens, and cache read tokens. |
+
+**Example output:**
+```
+In 30K · Out 8K · CW 5K · CR 20K
+```
+
+### performance
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `performance` |
+| **Data Source** | stdin (tokens) + session duration |
+| **Description** | Shows a composite efficiency score (0-100) based on cache hit rate and output token ratio. Higher scores indicate better efficiency. |
+
+**Example output:**
+```
+72%
+95%
+```
+
+### forecast
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `forecast` |
+| **Data Source** | stdin (cost) + session duration |
+| **Description** | Estimates the hourly cost based on the current session spending rate. |
+
+**Example output:**
+```
+~$8/h
+~$2/h
+```
+
+### budget
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `budget` |
+| **Data Source** | stdin (cost) + file (budget config) |
+| **Description** | Shows daily spending versus the configured budget limit. Requires `"dailyBudget"` in the config file. Shows a warning at 80% and critical alert at 95%. |
+
+**Example output:**
+```
+$5/$15
+$14/$15 !!
+```
+
+### todayCost
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `todayCost` |
+| **Data Source** | stdin (cost) + file (daily cost tracking) |
+| **Description** | Shows the total spending across all sessions today. Aggregates costs from the current session and any previous sessions on the same calendar day. |
+
+**Example output:**
+```
+💰 Today: $4.83
+💰 Today: $12.50
+```
+
+## Info Widgets
+
+### version
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `version` |
+| **Data Source** | stdin (version) |
+| **Description** | Displays the Claude Code version. Hidden when stdin does not provide version info. |
+
+**Example output:**
+```
+v1.0.80
+```
+
+### linesChanged
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `linesChanged` |
+| **Data Source** | git (`git diff HEAD --shortstat` + `git ls-files --others`) |
+| **Description** | Shows uncommitted lines added and removed, including untracked (new) files. Resets naturally on commit. Hidden when no changes exist. |
+
+**Example output:**
+```
++156 -23
++42
+-15
+```
+
+### outputStyle
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `outputStyle` |
+| **Data Source** | stdin (output_style) |
+| **Description** | Shows the current output style name. Hidden when the output style is "default" or not set. |
+
+**Example output:**
+```
+concise
+verbose
+```
+
+### vimMode
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `vimMode` |
+| **Data Source** | stdin (vim.mode) |
+| **Description** | Shows the current vim mode (NORMAL or INSERT). Auto-hides when vim mode is not enabled. |
+| **Preset Char** | `m` |
+
+**Example output:**
+```
+NORMAL
+INSERT
+```
+
+### apiDuration
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `apiDuration` |
+| **Data Source** | stdin (cost.total_duration_ms, cost.total_api_duration_ms) |
+| **Description** | Shows what percentage of session time was spent waiting for API responses. Useful for identifying whether a session is API-bound or tool-execution-bound. |
+| **Preset Char** | `a` |
+
+**Example output:**
+```
+API 45%
+API 72%
+```
+
+## Status Widgets
+
+### peakHours
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `peakHours` |
+| **Data Source** | system clock (Pacific Time via `Intl.DateTimeFormat`) |
+| **Description** | Shows whether the current time falls within Anthropic API peak hours (weekdays 5:00-10:59 AM PT). Displays a countdown to the next transition. Based on [PeakClaude](https://github.com/pforret/PeakClaude). |
+| **Preset Char** | `p` |
+
+**Example output:**
+```
+Peak (3h17m)
+Off-Peak (23h9m)
+Off-Peak (2d17h)
+```
+
+### tagStatus
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `tagStatus` |
+| **Data Source** | git (`describe` + `rev-list --count`) |
+| **Description** | Shows the number of commits ahead of each matched git tag. Configure patterns via `"tagPatterns"` (default `["v*"]`). Widget hides when no pattern matches a reachable tag. |
+| **Preset Char** | `t` |
+
+**Example output:**
+```
+v1.2.3 +5
+v1.2.3 +5, beta-3 +2
+```
+
+### slashCommand
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `slashCommand` |
+| **Data Source** | transcript (`<command-name>` tag in user text) |
+| **Description** | Displays the slash command that started the current turn (e.g. `/superpowers:brainstorming`). Cleared when the user sends a plain-text message. Survives Claude's tool loop — `tool_result`-only user entries do not clear the command. |
+| **Preset Char** | `/` |
+
+**Example output:**
+```
+🎯 /superpowers:brainstorming
+🎯 /claude-dashboard:setup
+```
+
+### agentMode
+
+| Property | Value |
+|----------|-------|
+| **Widget ID** | `agentMode` |
+| **Data Source** | stdin (`agent.name`, `agent_type`) |
+| **Description** | Shows this session's agent identity — a custom agent activated via `/agent <name>` (👤) and/or the subagent type when this session was dispatched as a subagent (🤖). Distinct from `agentStatus`, which tracks subagents spawned BY this session. Hidden when neither field is present. |
+| **Preset Char** | `g` |
+
+**Example output:**
+```
+👤 my-coder
+🤖 code-explorer
+👤 my-coder · 🤖 code-explorer
+```

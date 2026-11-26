@@ -1,0 +1,116 @@
+---
+title: Widgets
+description: Complete list of available widgets
+sidebar:
+  order: 2
+---
+
+claude-dashboard provides 49 widgets organized by category. Each widget can be individually enabled, disabled, or rearranged in your layout.
+
+## Core
+
+| Widget | Description |
+|--------|-------------|
+| `model` | Model name and version with emoji (e.g. `Opus 5.5`), effort level for Opus/Sonnet/Fable (MAX/X/H/M/L), fast mode for Opus (↯) |
+| `context` | Progress bar, percentage, tokens (green 0-50% / yellow 51-80% / red 81-100%) |
+| `contextBar` | Progress bar only (sub-widget of `context`) |
+| `contextPercentage` | Percentage only (sub-widget of `context`) |
+| `contextUsage` | Token count only, e.g. `42K/200K` (sub-widget of `context`) |
+| `cost` | Session cost in USD |
+| `projectInfo` | Directory + git branch (clickable OSC8 link) + ahead/behind (↑↓), subpath when CWD differs from project root, worktree indicator (🌳) |
+
+## Rate Limits
+
+| Widget | Description |
+|--------|-------------|
+| `rateLimit5h` | 5-hour rate limit with reset countdown; hidden on verified Ultra accounts, which have no 5h limit |
+| `rateLimit7d` | 7-day rate limit (Pro, Max and Ultra) |
+| `rateLimit7dSonnet` | 7-day Sonnet limit (Max plan only) — deprecated ~2026-06, merged into the unified weekly bucket at Sonnet 5 launch; stays hidden while the API returns null |
+| `rateLimit7dFable` | 7-day Fable limit (Max and Ultra plans) — Fable-only weekly cap from the API `limits[]` array; hidden unless the account has a Fable cap |
+
+## Session
+
+| Widget | Description |
+|--------|-------------|
+| `sessionId` | Session ID (short 8-char) |
+| `sessionIdFull` | Session ID (full UUID) |
+| `sessionName` | Session name from /rename command |
+| `sessionDuration` | Session duration |
+| `lastPrompt` | Last user prompt with timestamp |
+| `configCounts` | CLAUDE.md, AGENTS.md, rules, MCPs, hooks, +Dirs |
+
+## Activity
+
+| Widget | Description |
+|--------|-------------|
+| `toolActivity` | Running/completed tools with target display (e.g., `Read(app.ts)`, `Bash(npm test)`) |
+| `agentStatus` | Subagent progress with resolved model, e.g. `Explore(Opus)` |
+| `todoProgress` | Todo completion rate |
+
+## Analytics
+
+| Widget | Description |
+|--------|-------------|
+| `burnRate` | Token consumption per minute, session average (input + cache write + output) |
+| `tokenSpeed` | Output token generation speed, session average (e.g., `67 tok/s`) |
+| `tokenSpeedLast` | Output token generation speed of the most recent response (e.g., `last 150 tok/s`) |
+| `cacheHit` | Cache hit rate percentage (last request) |
+| `promptCache` | Session prompt-cache health: ♨️ warm with time left before it goes cold / ❄️ cold, hit ratio, miss count (Claude Code ≥ 2.1.251) |
+| `promptCacheState` | Warm/cold icon + time left only (sub-widget of `promptCache`) |
+| `promptCacheHit` | Session cache hit ratio only (sub-widget of `promptCache`) |
+| `promptCacheMisses` | Miss count only (sub-widget of `promptCache`) |
+| `depletionTime` | Estimated time to rate limit (approx) [1] |
+
+## Multi-CLI
+
+| Widget | Description |
+|--------|-------------|
+| `codexUsage` | OpenAI Codex CLI usage (auto-hide if not installed) [2] |
+| `geminiUsage` | Google Gemini CLI - current model (auto-hide if not installed or on a retired personal tier; not in `detailed`) [3] |
+| `geminiUsageAll` | Google Gemini CLI - all models (auto-hide if not installed) [3] |
+| `antigravityUsage` | Google Antigravity CLI - weekly quota per model family, Gemini vs Claude+GPT (auto-hide if not installed) [4] |
+| `antigravityUsageAll` | Google Antigravity CLI - all model buckets (auto-hide if not installed) [4] |
+| `zaiUsage` | z.ai/ZHIPU usage (auto-hide if not using z.ai) [5] |
+
+## Insights
+
+| Widget | Description |
+|--------|-------------|
+| `tokenBreakdown` | Input/output/cache write/read token breakdown |
+| `performance` | Composite efficiency badge (cache hit + output ratio) |
+| `forecast` | Estimated hourly cost based on session rate |
+| `budget` | Daily spending vs configured budget limit [6] |
+| `todayCost` | Total spending across all sessions today |
+
+## Info
+
+| Widget | Description |
+|--------|-------------|
+| `version` | Claude Code version display |
+| `linesChanged` | Lines added/removed count, including untracked files (e.g., `+156 -23`) |
+| `outputStyle` | Current output style (hidden when default) |
+| `vimMode` | Vim mode (NORMAL/INSERT), auto-hides when vim disabled |
+| `apiDuration` | API time as % of total session time |
+
+## Status
+
+| Widget | Description |
+|--------|-------------|
+| `peakHours` | Peak hours indicator with countdown ([based on PeakClaude](https://github.com/pforret/PeakClaude))[7] |
+| `tagStatus` | Commits ahead of matched git tags (default pattern `v*`, configure via `tagPatterns`) |
+| `slashCommand` | Active slash command for the current turn (🎯), cleared by next plain-text message |
+| `agentMode` | Session agent identity: 👤 custom agent (via `/agent <name>`) or 🤖 subagent type |
+
+## Notes
+
+1. **depletionTime** assumes all utilization came from the current session; accuracy improves as the session runs longer.
+2. **codexUsage** auto-hides if `~/.codex/auth.json` is not found.
+3. **geminiUsage** and **geminiUsageAll** auto-hide if `~/.gemini/oauth_creds.json` is not found. (Gemini CLI personal tiers retired 2026-06-18; enterprise still supported)
+4. **antigravityUsage** and **antigravityUsageAll** auto-hide if `~/.gemini/antigravity-cli/antigravity-oauth-token` is not found.
+5. **zaiUsage** auto-hides if not detected via `ANTHROPIC_BASE_URL`.
+6. **budget** requires `"dailyBudget"` to be set in the configuration file.
+7. **peakHours** peak = weekdays 5-11 AM PT; shows countdown to next transition.
+
+## Language Support
+
+All widget labels support English and Korean. The language is auto-detected from your system or can be set explicitly via the setup command.

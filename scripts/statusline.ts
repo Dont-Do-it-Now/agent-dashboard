@@ -1,0 +1,222 @@
+#!/usr/bin/env node
+
+/**
+ * Claude Dashboard Status Line
+ * Displays model info, context usage, rate limits, and more
+ * @handbook 2.2-import-order
+ * @handbook 4.6-config-caching
+ * @handbook 6.1-hierarchical-defense
+ * @handbook 9.4-render-mode-env
+ * @tested scripts/__tests__/statusline-mod-env.test.ts
+ */
+
+import { readFile, stat } from 'fs/promises';
+import { join } from 'path';
+import { homedir } from 'os';
+
+import type { StdinInput, Config, WidgetContext, UsageLimits, WidgetId } from './types.js';
+import { DEFAULT_CONFIG, parsePreset } from './types.js';
+import { COLORS, colorize, setTheme, setSeparatorStyle } from './utils/colors.js';
+import { ICON } from './utils/emoji.js';
+import { fetchUsageLimits } from './utils/api-client.js';
+import { getTranslations } from './utils/i18n.js';
+import { formatOutput, getWidget } from './widgets/index.js';
+import { hasScopedWeeklyLimits } from './widgets/rate-limit.js';
+import { resolveRenderMode, resolveModLayout, isPaneOverview, MOD_UNAVAILABLE_WIDGETS } from './utils/render-mode.js';
+import { renderPaneView } from './views/index.js';
+import { renderOverview } from './views/overview.js';
+import { markBand, clearBand, isBandActive } from './utils/band-marker.js';
+
+// The plugin's own config, not one of Claude Code's files, so it deliberately
+// stays on homedir() rather than following CLAUDE_CONFIG_DIR: setup writes it to
+// ~/.claude unconditionally, and relocating the read would silently reset an
+// existing multi-account user's dashboard to DEFAULT_CONFIG.
+const CONFIG_PATH = join(homedir(), '.claude', 'claude-dashboard.local.json');
+
+/**
+ * Cached config with mtime-based invalidation
+ */
+let configCache: {
+  config: Config;
+  mtime: number;
+} | null = null;
+
+/**
+ * Read and parse stdin JSON
+ */
+async function readStdin(): Promise<StdinInput | null> {
+  try {
+    const chunks: Buffer[] = [];
+    for await (const chunk of process.stdin) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const content = Buffer.concat(chunks).toString('utf-8');
+    return JSON.parse(content) as StdinInput;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load user configuration with mtime-based cache and migration support
+ */
+async function loadConfig(): Promise<Config> {
+  try {
+    // Check mtime for cache invalidation
+    const fileStat = await stat(CONFIG_PATH);
+    const mtime = fileStat.mtimeMs;
+
+    // Return cached if mtime matches
+    if (configCache?.mtime === mtime) {
+      return configCache.config;
+    }
+
+    const content = await readFile(CONFIG_PATH, 'utf-8');
+    const userConfig = JSON.parse(content);
+
+    // Migrate old config format (add displayMode if missing)
+    const config: Config = {
+      ...DEFAULT_CONFIG,
+      ...userConfig,
+    };
+
+    // Apply preset shorthand if configured
+    if (config.preset) {
+      const lines = parsePreset(config.preset);
+      if (lines.length > 0) {
+        config.displayMode = 'custom';
+        config.lines = lines;
+      }
+    }
+
+    // Cache result
+    configCache = { config, mtime };
+    return config;
+  } catch {
+    return DEFAULT_CONFIG;
+  }
+}
+
+/**
+ * Convert a single stdin rate limit window (epoch seconds) to UsageLimits field format (ISO string).
+ */
+function convertStdinLimit(window: { used_percentage: number; resets_at: number }) {
+  return {
+    utilization: window.used_percentage,
+    resets_at: new Date(window.resets_at * 1000).toISOString(),
+  };
+}
+
+/**
+ * Convert stdin rate_limits (Unix epoch seconds) to UsageLimits format (ISO string).
+ * Returns null when stdin doesn't provide rate_limits (before first API response or older Claude Code).
+ */
+function parseStdinRateLimits(stdin: StdinInput): UsageLimits | null {
+  const rl = stdin.rate_limits;
+  if (!rl) return null;
+
+  return {
+    five_hour: rl.five_hour ? convertStdinLimit(rl.five_hour) : null,
+    seven_day: rl.seven_day ? convertStdinLimit(rl.seven_day) : null,
+    seven_day_sonnet: null, // Not available in stdin
+    seven_day_fable: null, // Not available in stdin
+  };
+}
+
+/**
+ * Main entry point
+ */
+async function main(): Promise<void> {
+  // Load configuration
+  let config = await loadConfig();
+
+  // Initialize theme and separator
+  setTheme(config.theme);
+  setSeparatorStyle(config.separator);
+
+  // Get translations
+  const translations = getTranslations(config);
+
+  // Read stdin
+  const stdin = await readStdin();
+  if (!stdin) {
+    console.log(colorize(ICON.warning, COLORS.yellow));
+    return;
+  }
+
+  const renderMode = resolveRenderMode(process.env);
+
+  if (renderMode.printSettings) {
+    console.log(JSON.stringify({ bandDefault: config.modBandDefault === true }));
+    return;
+  }
+
+  if (renderMode.clearSession) {
+    await clearBand(renderMode.clearSession);
+    return;
+  }
+
+  if (renderMode.markSession) {
+    await markBand(renderMode.markSession);
+  } else if (!renderMode.fromMod && stdin.session_id && (await isBandActive(stdin.session_id))) {
+    // The mod band is drawing this session's dashboard above the prompt.
+    console.log('');
+    return;
+  }
+
+  // Spread, not mutation: loadConfig() returns a cached object.
+  const isWidget = (id: string) => getWidget(id as WidgetId) !== undefined;
+  const paneOverview = renderMode.surface === 'pane' && isPaneOverview(config, isWidget);
+  if (renderMode.surface) {
+    config = { ...config, ...resolveModLayout(config, renderMode.surface, isWidget) };
+  }
+  if (renderMode.fromMod) {
+    config = {
+      ...config,
+      disabledWidgets: [...(config.disabledWidgets ?? []), ...MOD_UNAVAILABLE_WIDGETS],
+    };
+  }
+
+  // Session views read the transcript only: skip the rate-limit fetch and widget pipeline.
+  if (renderMode.paneView) {
+    console.log(await renderPaneView(renderMode.paneView, { stdin, config, translations, rateLimits: null }));
+    return;
+  }
+
+  // Build rate limits: prefer stdin, fallback to API
+  const stdinLimits = parseStdinRateLimits(stdin);
+  let rateLimits: UsageLimits | null;
+
+  if (!stdinLimits) {
+    // Stdin rate_limits not yet available — full API fallback
+    rateLimits = await fetchUsageLimits(config.cache.ttlSeconds);
+  } else if (hasScopedWeeklyLimits(config.plan)) {
+    // Hybrid: stdin for available windows, API only for seven_day_sonnet + seven_day_fable
+    const apiLimits = await fetchUsageLimits(config.cache.ttlSeconds);
+    rateLimits = {
+      ...stdinLimits,
+      seven_day_sonnet: apiLimits?.seven_day_sonnet ?? null,
+      seven_day_fable: apiLimits?.seven_day_fable ?? null,
+    };
+  } else {
+    rateLimits = stdinLimits;
+  }
+
+  // Create widget context
+  const ctx: WidgetContext = {
+    stdin,
+    config,
+    translations,
+    rateLimits,
+  };
+
+  // Format output using widget system
+  const output = paneOverview ? await renderOverview(ctx) : await formatOutput(ctx);
+
+  console.log(output);
+}
+
+// Run
+main().catch(() => {
+  console.log(colorize(ICON.warning, COLORS.yellow));
+});
