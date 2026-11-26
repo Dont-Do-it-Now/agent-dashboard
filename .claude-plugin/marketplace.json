@@ -1,5 +1,5 @@
 {
-  "name": "claude-dashboard",
+  "name": "agent-dashboard",
   "owner": {
     "name": "Reizeo",
     "email": "lugway@gmail.com"
@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "claude-dashboard",
+      "name": "agent-dashboard",
       "source": "./",
       "description": "Agent Dashboard provides a real-time status line for Claude Code with model, context, cost, rate limits, and multi-CLI usage monitoring. Supports Max/Pro plans with English and Korean localization.",
       "category": "monitoring",

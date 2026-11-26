@@ -21,14 +21,16 @@ const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
  * Derive the plugin's cache root from the shim's own location.
  *
  * <config>/plugins/data/<id>/statusline.mjs
- *   -> <config>/plugins/cache/claude-dashboard/claude-dashboard
+ *   -> <config>/plugins/cache/<plugin-name>/<plugin-name>
  *
  * Deriving beats baking the path in at write time: a changed CLAUDE_CONFIG_DIR or a
  * different account would otherwise leave the shim silently pointing at the wrong tree.
  */
 export function deriveCacheRoot(shimUrl) {
   const pluginsDir = path.resolve(path.dirname(fileURLToPath(shimUrl)), '..', '..');
-  return path.join(pluginsDir, 'cache', 'claude-dashboard', 'claude-dashboard');
+  const dataName = path.basename(path.dirname(fileURLToPath(shimUrl)));
+  const pluginName = dataName === 'agent-dashboard-agent-dashboard' ? 'agent-dashboard' : 'claude-dashboard';
+  return path.join(pluginsDir, 'cache', pluginName, pluginName);
 }
 
 /**

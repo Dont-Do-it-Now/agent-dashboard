@@ -87,7 +87,7 @@ export function syncShim(pluginRoot, pluginData) {
  * - Unquoted path (no spaces allowed, just non-whitespace before the pinned path tail)
  * Any other form — flags, arguments, wrappers — leaves the command alone.
  */
-const PINNED_TAIL = String.raw`[/\\]plugins[/\\]cache[/\\]claude-dashboard[/\\]claude-dashboard[/\\]\d+\.\d+\.\d+[/\\]dist[/\\]index\.js`;
+const PINNED_TAIL = String.raw`[/\\]plugins[/\\]cache[/\\](?:claude-dashboard[/\\]claude-dashboard|agent-dashboard[/\\]agent-dashboard)[/\\]\d+\.\d+\.\d+[/\\]dist[/\\]index\.js`;
 const PINNED_COMMAND = new RegExp(
   `^\\s*node\\s+(?:"[^"]*${PINNED_TAIL}"|'[^']*${PINNED_TAIL}'|(?!["'])\\S*${PINNED_TAIL})\\s*$`
 );

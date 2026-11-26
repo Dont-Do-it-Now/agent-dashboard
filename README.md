@@ -48,21 +48,21 @@ is required before those steps can be used for Agent Dashboard.
 
 ```
 /plugin marketplace add Dont-Do-it-Now/agent-dashboard
-/plugin install claude-dashboard
-/claude-dashboard:setup
+/plugin install agent-dashboard
+/agent-dashboard:setup
 ```
 
 ### Manual Installation
 
 ```bash
-git clone https://github.com/Dont-Do-it-Now/agent-dashboard.git "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-dashboard"
-/claude-dashboard:setup
+git clone https://github.com/Dont-Do-it-Now/agent-dashboard.git "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/agent-dashboard"
+/agent-dashboard:setup
 ```
 
-> `/claude-dashboard:setup` looks for the plugin under `plugins/cache/claude-dashboard/claude-dashboard/`,
-> which a manual clone into `plugins/claude-dashboard/` does not match — the setup command's shim lookup
+> `/agent-dashboard:setup` looks for the plugin under `plugins/cache/agent-dashboard/agent-dashboard/` when installed from the marketplace.
+> A manual clone into `plugins/agent-dashboard/` does not receive marketplace cache updates — the setup command's shim lookup
 > will find nothing to copy. Point `statusLine.command` in `settings.json` directly at your clone's
-> `dist/index.js` instead (e.g. `node "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-dashboard/dist/index.js"`),
+> `dist/index.js` instead (e.g. `node "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/agent-dashboard/dist/index.js"`),
 > and note that manual installs do not get automatic version pickup — `git pull` and update the path
 > yourself after each release.
 
@@ -165,19 +165,19 @@ The optional `extension` object is stored in `~/.claude/claude-dashboard.local.j
 
 This release does not claim automatic quota resume, delayed prompt injection, or host setting mutation. Claude Code 2.1.332 exposes `--resume`, `--model`, and `--effort`, but no verified quota scheduler. Codex CLI 0.172.0 exposes `queue --thread --message` (and optional `--resume`), but no verified native delayed scheduler or automatic quota unpause. After a reset, use the host's documented resume/queue command manually. The `retryCountdown` widget is display-only and does not keep a process alive.
 
-For diagnostics, inspect the installed Claude/Codex versions and run the existing `/claude-dashboard:setup` or `/claude-dashboard:update` command. Do not edit Claude host settings to enable unsupported automation.
+For diagnostics, inspect the installed Claude/Codex versions and run the existing `/agent-dashboard:setup` or `/agent-dashboard:update` command. Do not edit Claude host settings to enable unsupported automation.
 
 ## Configuration
 
 ```bash
 # Preset modes
-/claude-dashboard:setup compact             # 1 line (default)
-/claude-dashboard:setup normal en pro       # 2 lines, English, Pro plan
-/claude-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
+/agent-dashboard:setup compact             # 1 line (default)
+/agent-dashboard:setup normal en pro       # 2 lines, English, Pro plan
+/agent-dashboard:setup detailed ko max     # 6 lines, Korean, Max plan
 
 # Custom mode: control widget order and line composition
 # Format: "widget1,widget2,...|widget3,widget4,..." (| separates lines)
-/claude-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
+/agent-dashboard:setup custom auto max "model,context,cost|projectInfo,todoProgress"
 ```
 
 **Plan differences:**
@@ -190,7 +190,7 @@ For diagnostics, inspect the installed Claude/Codex versions and run the existin
 <details>
 <summary><strong>Advanced Configuration</strong></summary>
 
-**Interactive Mode:** Run `/claude-dashboard:setup` without arguments. Best for preset selection; for full widget control, use Direct Mode or edit the JSON file directly.
+**Interactive Mode:** Run `/agent-dashboard:setup` without arguments. Best for preset selection; for full widget control, use Direct Mode or edit the JSON file directly.
 
 **Display Mode Presets** (`zaiUsage` and `rateLimit*` are mutually exclusive based on provider):
 
@@ -251,7 +251,7 @@ Or use preset shorthand for quick configuration:
 
 ## Commands
 
-### `/claude-dashboard:setup`
+### `/agent-dashboard:setup`
 
 Configure the status line display mode, language, and plan. See [Configuration](#configuration).
 
@@ -267,12 +267,12 @@ Check usage limits for all AI CLIs (Claude, Codex, Gemini, Antigravity, z.ai) at
 
 ![check-usage](images/check-usage.png)
 
-### `/claude-dashboard:setup-alias`
+### `/agent-dashboard:setup-alias`
 
 Add a `check-ai` shell alias to quickly check all AI CLI usage from your terminal. Supports macOS/Linux (zsh/bash) and Windows (PowerShell).
 
 ```bash
-/claude-dashboard:setup-alias
+/agent-dashboard:setup-alias
 ```
 
 After setup:
@@ -325,7 +325,7 @@ The selected view is kept for the session only (a new session starts on `dashboa
 ```
 
 - `modPane` / `modBand` accept a display mode name (`compact` / `normal` / `detailed`), a preset string, or custom widget lines (`[["model","context"],["sessionIdFull"]]`). Unknown widget ids are dropped; if nothing is left, the default is used. `modBandDefault: true` turns the band on at session start.
-- Interactive `/claude-dashboard:setup` asks how you want to use the mod dashboard (status line only, peek with pane, replace with band, or both) and writes these keys; rerunning setup keeps keys it does not ask about.
+- Interactive `/agent-dashboard:setup` asks how you want to use the mod dashboard (status line only, peek with pane, replace with band, or both) and writes these keys; rerunning setup keeps keys it does not ask about.
 - **How hiding works:** the band writes a per-session heartbeat marker (`~/.cache/claude-dashboard/band-<sessionId>`), refreshed on every render (at most every 60s) and ignored after 180s. It is deleted on `off` and at session end, so if the mod stops the status line comes back by itself within 3 minutes.
 - Theme, language, and `disabledWidgets` follow your normal config. `cacheHit`, `tokenBreakdown`, and `performance` are hidden in the pane and band (the mod API has no per-request cache usage).
 - Data comes from the mod API (context, rate limits, and cost pushed by Claude Code) and the unchanged renderer `dist/index.js`, run as a subprocess.
@@ -367,7 +367,7 @@ Notes:
 
 - The variable must be a single directory path, and must be exported to the session.
 - On macOS the OAuth token comes from the Keychain, which holds one entry for all accounts — `CLAUDE_CONFIG_DIR` separates `settings.json` and `history.jsonl` reads, but rate-limit API calls use whichever OAuth token the Keychain holds.
-- `/claude-dashboard:setup` and `/claude-dashboard:update` register the status line into the session's config dir (`$CLAUDE_CONFIG_DIR` if set, `~/.claude` otherwise) — run them once per account. The dashboard's own display config `~/.claude/claude-dashboard.local.json` is intentionally shared across accounts.
+- `/agent-dashboard:setup` and `/agent-dashboard:update` register the status line into the session's config dir (`$CLAUDE_CONFIG_DIR` if set, `~/.claude` otherwise) — run them once per account. The dashboard's own display config `~/.claude/claude-dashboard.local.json` is intentionally shared across accounts.
 
 </details>
 
@@ -377,8 +377,8 @@ Notes:
 Run setup with explicit language:
 
 ```
-/claude-dashboard:setup normal ko  # Korean
-/claude-dashboard:setup normal en  # English
+/agent-dashboard:setup normal ko  # Korean
+/agent-dashboard:setup normal en  # English
 ```
 
 </details>
