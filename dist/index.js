@@ -596,7 +596,7 @@ function hashToken(token) {
 }
 
 // scripts/version.ts
-var VERSION = "1.36.0";
+var VERSION = "0.1.0";
 
 // scripts/utils/debug.ts
 var DEBUG = process.env.DEBUG === "claude-dashboard" || process.env.DEBUG === "1" || process.env.DEBUG === "true";
@@ -1613,7 +1613,7 @@ var rateLimit7dFableWidget = {
 };
 
 // scripts/widgets/project-info.ts
-import { basename, relative } from "path";
+import { basename, relative, isAbsolute, sep } from "path";
 
 // scripts/utils/git.ts
 import { execFile as execFile3 } from "child_process";
@@ -1720,7 +1720,8 @@ var projectInfoWidget = {
     }
     const projectDir = ctx.stdin.workspace?.project_dir;
     const dirName = basename(projectDir || currentDir);
-    const subPath = projectDir && currentDir !== projectDir && currentDir.startsWith(projectDir + "/") ? relative(projectDir, currentDir) : void 0;
+    const projectRelative = projectDir ? relative(projectDir, currentDir) : "";
+    const subPath = projectRelative && projectRelative !== ".." && !projectRelative.startsWith(`..${sep}`) && !isAbsolute(projectRelative) ? projectRelative.split(sep).join("/") : void 0;
     const worktreeName = ctx.stdin.worktree?.name || void 0;
     const { branch, dirty, ab, remoteUrl } = await getGitData(currentDir);
     let gitBranch;
@@ -5388,7 +5389,7 @@ async function listSubagents(transcriptPath, now = Date.now(), limit = MAX_SUBAG
 }
 
 // scripts/views/shared.ts
-import { relative as relative2, isAbsolute, sep } from "path";
+import { relative as relative2, isAbsolute as isAbsolute2, sep as sep2 } from "path";
 import { homedir as homedir4 } from "os";
 function makeViewContext(ctx, transcript, now) {
   return { ctx, transcript, t: ctx.translations.paneViews, theme: getTheme(), now };
@@ -5419,13 +5420,13 @@ function modelLabel(model) {
   return version ? `${family} ${version}` : family;
 }
 function displayPath(path6, base) {
-  if (base && isAbsolute(path6)) {
+  if (base && isAbsolute2(path6)) {
     const rel = relative2(base, path6);
-    if (rel && !rel.startsWith("..") && !isAbsolute(rel))
-      return rel;
+    if (rel && !rel.startsWith("..") && !isAbsolute2(rel))
+      return rel.split(sep2).join("/");
   }
   const home = homedir4();
-  return path6.startsWith(home + sep) ? `~${path6.slice(home.length)}` : path6;
+  return path6.startsWith(home + sep2) ? `~${path6.slice(home.length)}` : path6;
 }
 
 // scripts/views/turns.ts
