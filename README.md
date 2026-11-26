@@ -11,16 +11,16 @@ Agent Dashboard is a comprehensive status line plugin for Claude Code with unifi
 |---|---:|---|---|
 | Claude Code | v1.0.80+ | Native `statusLine.command`, plugin commands, lifecycle hooks, usage/context/cost/rate-limit widgets | Supported |
 | Claude Code | v2.1.332 verified | Effort/model fields, lifecycle event mapping, extension policy and retry countdown display | Verified locally |
-| Codex CLI | v0.171.0+ | Native `agent-dashboard` Codex plugin package with setup/status Skill | Supported |
+| Codex CLI | v0.171.0+ | Native `agent-dashboard` MCP statusline provider and setup/status Skill | Supported when `tui_extensions_statusline` is enabled |
 | Codex CLI | v0.172.0 verified | `queue --thread --message` can target an existing session when invoked manually | Manual queue only; no native scheduler |
 
-Agent Dashboard does not claim automatic quota resume, delayed prompt injection, or Codex TUI statusline rendering. Unsupported automation remains disabled and is documented as manual guidance.
+Agent Dashboard does not claim automatic quota resume or delayed prompt injection. The Codex TUI footer is rendered by the official MCP statusline provider contract and refreshes automatically after the provider is selected.
 
 ## Installation
 
 **Requirements:** Node.js 18+.
 
-For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code v2.1.332 is the locally verified extension baseline. Codex CLI plugin installation requires a version with `codex plugin` and `skills` support; Codex CLI v0.172.0 is locally verified. The Codex plugin provides native Skills, while the separate experimental TUI statusline host remains disabled unless explicitly supported by the installed Codex release.
+For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code v2.1.332 is the locally verified extension baseline. Codex CLI plugin installation requires a version with `codex plugin`, `skills`, and the experimental `tui_extensions_statusline` feature; Codex CLI v0.172.0 is locally verified.
 
 `npx` is not required for either host. Use Claude's `/plugin` commands for Claude Code and Codex's `codex plugin` commands for Codex CLI.
 
@@ -29,7 +29,7 @@ For the native Claude status line, use Claude Code v1.0.80 or later. Claude Code
 The existing Claude renderer uses Claude Code's `statusLine.command` interface.
 Codex's custom MCP footer is a separate, experimental host interface; the presence
 of the `codexUsage` widget in this plugin does not mean it renders inside Codex.
-The Codex package is a native Skills plugin. It does not add an MCP server, wrapper, daemon, or external service. The shared statusline renderer is not automatically injected into Codex's TUI.
+The Codex package is a native Skills + MCP provider plugin. Its stdio MCP process is started by Codex from the installed plugin; it does not add a wrapper, daemon, supervisor, or external server. After the one-time provider selection, Codex polls the footer automatically.
 
 | Codex CLI release | Official custom-statusline milestone |
 | --- | --- |
@@ -59,11 +59,14 @@ is required before those steps can be used for Agent Dashboard.
 ```bash
 codex plugin marketplace add Dont-Do-it-Now/agent-dashboard
 codex plugin add agent-dashboard@agent-dashboard
+codex features enable tui_extensions_statusline
 ```
 
 Verify the installation with `codex plugin list --json`; the entry should show
-`agent-dashboard@agent-dashboard` with `enabled: true`. Then ask Codex to use the
-`agent-dashboard` Skill for setup or supported-field guidance.
+`agent-dashboard@agent-dashboard` with `enabled: true`. In a new Codex TUI session,
+open `/statusline` once and select `Agent Dashboard`; the selection is persisted and
+the footer then refreshes automatically. Ask Codex to use the `agent-dashboard` Skill
+for setup or supported-field guidance.
 
 ### Manual Installation
 
@@ -176,7 +179,7 @@ The optional `extension` object is stored in `~/.claude/agent-dashboard.local.js
 }
 ```
 
-This release does not claim automatic quota resume, delayed prompt injection, or host setting mutation. Claude Code 2.1.332 exposes `--resume`, `--model`, and `--effort`, but no verified quota scheduler. Codex CLI 0.172.0 exposes `queue --thread --message` (and optional `--resume`), but no verified native delayed scheduler or automatic quota unpause. After a reset, use the host's documented resume/queue command manually. The `retryCountdown` widget is display-only and does not keep a process alive.
+This release does not claim automatic quota resume or delayed prompt injection. Claude Code 2.1.332 exposes `--resume`, `--model`, and `--effort`, but no verified quota scheduler. Codex CLI 0.172.0 exposes `queue --thread --message` (and optional `--resume`), but no verified native delayed scheduler or automatic quota unpause. After a reset, use the host's documented resume/queue command manually. The `retryCountdown` widget is display-only and does not keep a process alive.
 
 For diagnostics, inspect the installed Claude/Codex versions and run the existing `/agent-dashboard:setup` or `/agent-dashboard:update` command. Do not edit Claude host settings to enable unsupported automation.
 
