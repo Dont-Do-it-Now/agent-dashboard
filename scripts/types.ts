@@ -279,9 +279,20 @@ export interface Config {
    * tag (the most recent reachable from HEAD). Defaults to ['v*'].
    */
   tagPatterns?: string[];
+  /** Optional extension settings. Omitted means the legacy dashboard behavior. */
+  extension?: ExtensionConfig;
   cache: {
     ttlSeconds: number;
   };
+}
+
+export type ExtensionMode = 'off' | 'warn' | 'ask' | 'auto';
+export interface ExtensionLevel { modelId: string; effort: string; }
+export interface ExtensionConfig {
+  forecast?: { enabled?: boolean; windowMinutes?: number; minSamples?: number; warningPercent?: number; [key: string]: unknown };
+  adaptive?: { mode?: ExtensionMode; cooldownMinutes?: number; restoreAfterReset?: boolean; providers?: Record<string, { levels?: ExtensionLevel[]; [key: string]: unknown }>; [key: string]: unknown };
+  retry?: { enabled?: boolean; resetDelaySeconds?: number; maxAttempts?: number; maxWaitMinutes?: number; verifyReset?: boolean; prompt?: string; [key: string]: unknown };
+  [key: string]: unknown;
 }
 
 /**

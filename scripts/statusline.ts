@@ -16,6 +16,7 @@ import { homedir } from 'os';
 
 import type { StdinInput, Config, WidgetContext, UsageLimits, WidgetId } from './types.js';
 import { DEFAULT_CONFIG, parsePreset } from './types.js';
+import { normalizeExtensionConfig } from './utils/extension-config.js';
 import { COLORS, colorize, setTheme, setSeparatorStyle } from './utils/colors.js';
 import { ICON } from './utils/emoji.js';
 import { fetchUsageLimits } from './utils/api-client.js';
@@ -79,6 +80,8 @@ async function loadConfig(): Promise<Config> {
       ...DEFAULT_CONFIG,
       ...userConfig,
     };
+    const extension = normalizeExtensionConfig(userConfig.extension);
+    if (extension.config) config.extension = extension.config;
 
     // Apply preset shorthand if configured
     if (config.preset) {

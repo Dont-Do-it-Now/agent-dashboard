@@ -86,6 +86,113 @@ var DEFAULT_CONFIG = {
 };
 var NEGATIVE_CACHE_SECONDS = 30;
 
+// scripts/utils/extension-config.ts
+var integer = (value, min, max) => Number.isFinite(value) && Number.isInteger(value) && value >= min && value <= max;
+var bool = (value) => typeof value === "boolean";
+function levels(value, diagnostics, provider) {
+  if (!Array.isArray(value) || value.some((item) => !item || typeof item !== "object" || typeof item.modelId !== "string" || typeof item.effort !== "string")) {
+    diagnostics.push(`adaptive.providers.${provider}.levels is invalid`);
+    return void 0;
+  }
+  return value.map((item) => ({ ...item, modelId: item.modelId, effort: item.effort }));
+}
+function normalizeExtensionConfig(value) {
+  if (value === void 0)
+    return { diagnostics: [] };
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return { diagnostics: ["extension must be an object"] };
+  const source = value;
+  const diagnostics = [];
+  const result = { ...source };
+  if (source.forecast !== void 0) {
+    const input = source.forecast;
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      diagnostics.push("extension.forecast is invalid");
+      result.forecast = { enabled: false };
+    } else {
+      const out = { ...input };
+      let valid = true;
+      if (input.enabled !== void 0 && !bool(input.enabled))
+        valid = false;
+      if (input.windowMinutes !== void 0 && !integer(input.windowMinutes, 1, 10080))
+        valid = false;
+      if (input.minSamples !== void 0 && !integer(input.minSamples, 1, 1e5))
+        valid = false;
+      if (input.warningPercent !== void 0 && !integer(input.warningPercent, 1, 100))
+        valid = false;
+      if (!valid) {
+        diagnostics.push("extension.forecast contains invalid values");
+        out.enabled = false;
+      }
+      result.forecast = out;
+    }
+  }
+  if (source.adaptive !== void 0) {
+    const input = source.adaptive;
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      diagnostics.push("extension.adaptive is invalid");
+      result.adaptive = { mode: "off" };
+    } else {
+      const out = { ...input };
+      let valid = true;
+      if (input.mode !== void 0 && !["off", "warn", "ask", "auto"].includes(input.mode))
+        valid = false;
+      if (input.cooldownMinutes !== void 0 && !integer(input.cooldownMinutes, 1, 1440))
+        valid = false;
+      if (input.restoreAfterReset !== void 0 && !bool(input.restoreAfterReset))
+        valid = false;
+      if (input.providers !== void 0) {
+        if (!input.providers || typeof input.providers !== "object" || Array.isArray(input.providers))
+          valid = false;
+        else
+          out.providers = Object.fromEntries(Object.entries(input.providers).map(([provider, config]) => {
+            if (!config || typeof config !== "object" || Array.isArray(config)) {
+              diagnostics.push(`adaptive.providers.${provider} is invalid`);
+              return [provider, { levels: [] }];
+            }
+            const providerOut = { ...config };
+            if (config.levels !== void 0)
+              providerOut.levels = levels(config.levels, diagnostics, provider) ?? [];
+            return [provider, providerOut];
+          }));
+      }
+      if (!valid) {
+        diagnostics.push("extension.adaptive contains invalid values");
+        out.mode = "off";
+      }
+      result.adaptive = out;
+    }
+  }
+  if (source.retry !== void 0) {
+    const input = source.retry;
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      diagnostics.push("extension.retry is invalid");
+      result.retry = { enabled: false };
+    } else {
+      const out = { ...input };
+      let valid = true;
+      if (input.enabled !== void 0 && !bool(input.enabled))
+        valid = false;
+      if (input.resetDelaySeconds !== void 0 && !integer(input.resetDelaySeconds, 0, 600))
+        valid = false;
+      if (input.maxAttempts !== void 0 && !integer(input.maxAttempts, 1, 10))
+        valid = false;
+      if (input.maxWaitMinutes !== void 0 && !integer(input.maxWaitMinutes, 1, 10080))
+        valid = false;
+      if (input.verifyReset !== void 0 && !bool(input.verifyReset))
+        valid = false;
+      if (input.prompt !== void 0 && typeof input.prompt !== "string")
+        valid = false;
+      if (!valid) {
+        diagnostics.push("extension.retry contains invalid values");
+        out.enabled = false;
+      }
+      result.retry = out;
+    }
+  }
+  return { config: result, diagnostics };
+}
+
 // scripts/utils/colors.ts
 var THEMES = {
   default: {
@@ -596,7 +703,7 @@ function hashToken(token) {
 }
 
 // scripts/version.ts
-var VERSION = "0.1.2";
+var VERSION = "0.1.3";
 
 // scripts/utils/debug.ts
 var DEBUG = process.env.DEBUG === "claude-dashboard" || process.env.DEBUG === "1" || process.env.DEBUG === "true";
@@ -5811,6 +5918,9 @@ async function loadConfig() {
       ...DEFAULT_CONFIG,
       ...userConfig
     };
+    const extension = normalizeExtensionConfig(userConfig.extension);
+    if (extension.config)
+      config.extension = extension.config;
     if (config.preset) {
       const lines = parsePreset(config.preset);
       if (lines.length > 0) {
