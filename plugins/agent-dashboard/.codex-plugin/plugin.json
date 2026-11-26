@@ -1,6 +1,6 @@
 {
   "name": "agent-dashboard",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Native Codex skills for configuring and understanding the Agent Dashboard status integration.",
   "author": {
     "name": "Reizeo",
@@ -12,6 +12,7 @@
   "license": "MIT",
   "keywords": ["agent-dashboard", "codex", "status", "usage"],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Agent Dashboard",
     "shortDescription": "Configure and inspect Agent Dashboard for Codex",

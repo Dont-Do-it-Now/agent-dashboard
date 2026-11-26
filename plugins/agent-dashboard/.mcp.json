@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "agent-dashboard": {
+      "command": "node",
+      "args": ["./mcp/statusline.mjs", "--stdio"],
+      "cwd": ".",
+      "tool_timeout_sec": 1
+    }
+  }
+}

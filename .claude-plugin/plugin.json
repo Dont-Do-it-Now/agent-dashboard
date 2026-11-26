@@ -1,6 +1,6 @@
 {
   "name": "agent-dashboard",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Agent Dashboard status line for Claude Code with multi-CLI usage monitoring, context, rate limits, and cost tracking",
   "author": {
     "name": "Reizeo"
