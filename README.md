@@ -3,7 +3,48 @@
 ![License](https://img.shields.io/github/license/Dont-Do-it-Now/agent-dashboard)
 ![Stars](https://img.shields.io/github/stars/Dont-Do-it-Now/agent-dashboard)
 
-Agent Dashboard is a comprehensive status line plugin for Claude Code with unified usage monitoring across Claude, Codex, Gemini, Antigravity, and z.ai CLIs, context, rate limits, cost tracking, and modular widgets.
+Agent Dashboard is a status-line and session-visibility plugin for Claude Code and Codex CLI. It provides host-specific context, usage, cost, rate-limit, session, and activity information without pretending that one host exposes another host's data.
+
+## Feature overview
+
+The important distinction is the host boundary: Claude Code supplies the full
+status-line input used by the widget system, while Codex supplies a separate
+MCP status-line snapshot with a smaller, explicitly documented field set.
+
+| Capability | Claude Code | Codex CLI |
+|---|---|---|
+| Context progress bar, percentage, and token usage | Supported | Supported when the host supplies the field |
+| Model, cost, 5-hour/7-day limits | Supported | Supported when the host supplies the field; only confirmed limit windows are labelled |
+| Project/session details | Project path, Git branch, session ID/name, duration | Workspace name, derived Git branch, provider session duration |
+| `burnRate`, token speed, Todo progress, tool/agent activity | Supported by Claude widgets | Burn rate is derived from Codex totals; unavailable Todo/tool values remain visible as `—`; agent state is supported |
+| Retry countdown | Display-only when an adapter supplies retry state | Manual retry state is shown; the provider cannot restart a Codex turn |
+| Automatic restart, quota resume, delayed prompt injection | Not claimed; host resume commands remain manual | Not claimed; Codex queue/resume remains manual |
+| Layout configuration | `/agent-dashboard:setup` and Claude config | `codex-statusline.json` with `compact`, `normal`, or `detailed` |
+
+### Codex status line
+
+After selecting `Agent Dashboard` in `/statusline`, Codex renders the native
+provider footer. The default layout is `detailed` and can show the model,
+context bar, context tokens, cost, confirmed 5-hour/7-day limits, workspace
+and Git branch, session duration, burn rate, Todo/tool placeholders, and agent
+state. Configure it on Windows with:
+
+```text
+%APPDATA%\\agent-dashboard\\codex-statusline.json
+```
+
+```json
+{ "preset": "detailed" }
+```
+
+Use `compact` or `normal` instead of `detailed` and restart the Codex TUI after
+changing the file. Codex's native `Configure Status Line` editor does not edit
+this provider's layout.
+
+The Codex integration keeps the same visual structure while distinguishing
+source quality: values derived from the workspace or provider session clock are
+shown normally, unavailable host values are shown as `—`, and automatic restart
+remains manual because a status-line provider cannot dispatch a new turn.
 
 ## Supported features
 
@@ -30,6 +71,21 @@ The existing Claude renderer uses Claude Code's `statusLine.command` interface.
 Codex's custom MCP footer is a separate, experimental host interface; the presence
 of the `codexUsage` widget in this plugin does not mean it renders inside Codex.
 The Codex package is a native Skills + MCP provider plugin. Its stdio MCP process is started by Codex from the installed plugin; it does not add a wrapper, daemon, supervisor, or external server. After the one-time provider selection, Codex polls the footer automatically.
+
+### Plugin updates
+
+Agent Dashboard updates its own plugin installation in each available host:
+
+```text
+/agent-dashboard:update
+```
+
+The command refreshes each host's marketplace metadata, updates stale
+`agent-dashboard` installations, and reports when no update is available. Claude
+and Codex keep separate plugin installations, so both hosts are processed
+independently. Codex updates require all Codex sessions to be closed before the
+plugin cache can be replaced. This command never updates Claude Code or Codex
+CLI themselves.
 
 | Codex CLI release | Official custom-statusline milestone |
 | --- | --- |
@@ -66,12 +122,16 @@ Verify the installation with `codex plugin list --json`; the entry should show
 `agent-dashboard@agent-dashboard` with `enabled: true`. In a new Codex TUI session,
 open `/statusline` once and select `Agent Dashboard`; the selection is persisted and
 the footer then refreshes automatically. Ask Codex to use the `agent-dashboard` Skill
-for setup or supported-field guidance.
+for setup or supported-field guidance. To select the Agent Dashboard layout, create
+`%APPDATA%\\agent-dashboard\\codex-statusline.json` on Windows with
+`{ "preset": "detailed" }`. Supported presets are `compact`, `normal`, and
+`detailed`; restart the Codex TUI after changing the file. The native Codex
+`Configure Status Line` editor does not edit this provider's layout.
 
-Run `codex plugin add` only on the first installation. If the plugin is already
-listed, the command may try to replace an active cache directory and fail with an
-access-denied backup error. Close all Codex sessions before removing and reinstalling
-an existing version; otherwise leave the enabled installation in place.
+For an already installed plugin, use `/agent-dashboard:update` instead. Codex
+updates may replace an active cache directory, so close all Codex sessions first.
+If the cache reports an access-denied or file-in-use error, do not retry while a
+Codex process is still running.
 
 ### Manual Installation
 
@@ -183,6 +243,8 @@ The optional `extension` object is stored in `~/.claude/agent-dashboard.local.js
   }
 }
 ```
+
+`/agent-dashboard:setup` now exposes these extension choices interactively: depletion warnings and forecast thresholds, adaptive model/effort policy (`off`, `warn`, `ask`, `auto`), and reset retry/countdown policy. The setup preserves unrelated keys when rerun. Model levels must be confirmed by the active host; unknown levels are not auto-applied.
 
 This release does not claim automatic quota resume or delayed prompt injection. Claude Code 2.1.332 exposes `--resume`, `--model`, and `--effort`, but no verified quota scheduler. Codex CLI 0.172.0 exposes `queue --thread --message` (and optional `--resume`), but no verified native delayed scheduler or automatic quota unpause. After a reset, use the host's documented resume/queue command manually. The `retryCountdown` widget is display-only and does not keep a process alive.
 
@@ -304,9 +366,9 @@ check-ai --json   # JSON output for scripting
 
 ### `/agent-dashboard:update`
 
-Repair or verify the statusLine shim. Usually unnecessary — after `/plugin update`, the
-status line picks up the new version on its own. Use this if you have hooks disabled or the
-status line stops updating.
+Update the Agent Dashboard plugin in each available host. If no newer plugin
+version exists, no installation changes are made. The command also keeps the
+existing status-line integration intact.
 
 ```bash
 /agent-dashboard:update

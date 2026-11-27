@@ -1,6 +1,6 @@
 {
   "name": "agent-dashboard",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Native Codex skills for configuring and understanding the Agent Dashboard status integration.",
   "author": {
     "name": "Reizeo",

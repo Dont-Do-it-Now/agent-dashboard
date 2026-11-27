@@ -22,7 +22,14 @@ Use this skill when the user asks to install, configure, or inspect Agent Dashbo
 3. Follow the repository README for the current Agent Dashboard setup steps.
 4. Enable the official experimental host feature with `codex features enable tui_extensions_statusline` when it is not already enabled.
 5. Select the installed `Agent Dashboard` provider once under `/statusline`; Codex persists that provider selection and polls it automatically for every displayed thread.
-6. If a requested statusline or usage field is not exposed by the host, state that limitation and provide the manual configuration guidance instead.
+6. Choose the Agent Dashboard layout in `%APPDATA%\\agent-dashboard\\codex-statusline.json` on Windows, or `$XDG_CONFIG_HOME/agent-dashboard/codex-statusline.json` on other systems:
+
+   ```json
+   { "preset": "detailed" }
+   ```
+
+   Supported presets are `compact`, `normal`, and `detailed`. Restart the Codex TUI after changing the file.
+7. If a requested statusline or usage field is not exposed by the host, state that limitation and provide the manual configuration guidance instead.
 
 ## Safety
 
